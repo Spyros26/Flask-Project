@@ -1,8 +1,8 @@
-function deleteNote(noteId) {
-  fetch("/delete-note", {
-    method: "POST",
-    body: JSON.stringify({ noteId: noteId }),
-  }).then((_res) => {
-    window.location.href = "/";
-  });
-}
+function deleteSession(sessionId) {
+    fetch("/delete-session", {
+      method: "POST",
+      body: JSON.stringify({ sessionId: sessionId }),
+    }).then((_res) => {
+      window.location.href = "/issue-statement";
+    });
+  }

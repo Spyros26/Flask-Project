@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request, flash, jsonify
+from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import Note
+from .models import ChargingSession
 from . import db
 import json
 
@@ -11,27 +11,51 @@ views = Blueprint('views', __name__)
 @login_required
 def home():
     if request.method == 'POST':
-        note = request.form.get('note')
+        charging_program = request.form.get('charging_program')
+        EV = request.form.get('EV')
 
-        if len(note) < 1:
-            flash('Note is too short!', category='error')
+        if len(EV) < 5:
+            flash('EV is invalid', category='error')
+        elif len(charging_program) > 2:
+            flash('The Charging Program you selected does not exist!', category='error')
         else:
-            new_note = Note(data=note, user_id=current_user.id)
-            db.session.add(new_note)
+            new_charging_session = ChargingSession(EV=EV, charging_program=charging_program, user_id=current_user.id)
+            db.session.add(new_charging_session)
             db.session.commit()
-            flash('Note added!', category='success')
+            flash('Wait for charging process!', category='success')
+            return redirect(url_for('views.charging'))
 
     return render_template("home.html", user=current_user)
 
 
-@views.route('/delete-note', methods=['POST'])
-def delete_note():
-    note = json.loads(request.data)
-    noteId = note['noteId']
-    note = Note.query.get(noteId)
-    if note:
-        if note.user_id == current_user.id:
-            db.session.delete(note)
+@views.route('/charging', methods=['GET', 'POST'])
+@login_required
+def charging():
+    if request.method == 'POST':
+        flash('Charging stopped!', category='success')
+        return redirect(url_for('views.home'))
+
+    return render_template("charging.html", user=current_user)
+
+
+@views.route('/issue-statement', methods=['GET', 'POST'])
+@login_required
+def view_sessions():
+    if request.method == 'POST':
+        flash('The statement has been successfully issued!', category='success')
+        return redirect(url_for('views.home'))
+
+    return render_template("view_sessions.html", user=current_user)
+
+
+@views.route('/delete-session', methods=['POST'])
+def delete_session():
+    session = json.loads(request.data)
+    sessionId = session['sessionId']
+    session = ChargingSession.query.get(sessionId)
+    if session:
+        if session.user_id == current_user.id:
+            db.session.delete(session)
             db.session.commit()
 
     return jsonify({})
