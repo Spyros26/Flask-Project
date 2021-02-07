@@ -24,7 +24,7 @@ def home():
             db.session.commit()
             flash('Wait for charging process!', category='success')
             return redirect(url_for('views.charging'))
-
+    
     return render_template("home.html", user=current_user)
 
 
@@ -59,4 +59,6 @@ def delete_session():
             db.session.commit()
 
     return jsonify({})
+
+
 

@@ -3,4 +3,8 @@ setInterval(() => {
   const computedStyle = getComputedStyle(progressBar)
   const width = parseFloat(computedStyle.getPropertyValue('--width')) || 0
   progressBar.style.setProperty('--width', width + .1)
-}, 5)
+  if (width == 100) {
+      window.location.href = "/";
+  }
+}, 20)
+
