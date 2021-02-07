@@ -4,9 +4,11 @@
 <ul class="list-group list-group-flush" id="charging_sessions">
   {% for charging_session in user.charging_sessions %}
   <li class="list-group-item">
-    {{ charging_session.EV }}
-    {{ charging_session.date }}
-    {{ charging_session.charging_program }}
+    EV: {{ charging_session.EV }} 
+    <br />
+    date: {{ charging_session.date }}
+    <br />
+    Charging program: {{ charging_session.charging_program }} 
     <button type="button" class="close" onClick="deleteSession({{ charging_session.id }})">
       <span aria-hidden="true">&times;</span>
     </button>

@@ -6,3 +6,5 @@ function deleteSession(sessionId) {
       window.location.href = "/issue-statement";
     });
   }
+
+  

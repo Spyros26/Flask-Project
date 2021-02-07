@@ -59,3 +59,4 @@ def delete_session():
             db.session.commit()
 
     return jsonify({})
+
