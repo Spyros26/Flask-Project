@@ -13,7 +13,12 @@ class ChargingSession(db.Model):
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True)
-    password = db.Column(db.String(150))
-    first_name = db.Column(db.String(150))
+    public_id = db.Column(db.String(50), unique=True)
+    username = db.Column(db.String(40), unique=True)
+    password = db.Column(db.String(60))
+    admin = db.Column(db.Boolean)
     charging_sessions = db.relationship('ChargingSession')
+
+class RevokedToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(150))    

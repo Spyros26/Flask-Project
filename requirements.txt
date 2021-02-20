@@ -1,3 +1,4 @@
 flask
 Flask-SQLAlchemy
 flask-login
+PyJWT==1.6.4

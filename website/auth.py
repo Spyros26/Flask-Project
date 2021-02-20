@@ -1,66 +1,114 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, make_response
+from .models import User, RevokedToken
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
-from flask_login import login_user, login_required, logout_user, current_user
+
+import uuid
+import jwt
+import datetime
+from functools import wraps
 
 
 auth = Blueprint('auth', __name__)
 
+def token_made_black(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
 
-@auth.route('/login', methods=['GET', 'POST'])
+        if 'X-OBSERVATORY-AUTH' in request.headers:
+            token = request.headers['X-OBSERVATORY-AUTH']
+
+        invalid = RevokedToken.query.filter_by(token=token).first()
+
+        if not token:
+            return jsonify({'message' : 'Token not found!'}), 400
+
+        if invalid:
+            return jsonify({'message' : 'Invalid Token!'}), 400 
+
+        return f(token, *args, **kwargs)
+
+    return decorated
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        
+        if 'X-OBSERVATORY-AUTH' in request.headers:
+            token = request.headers['X-OBSERVATORY-AUTH']
+
+        invalid = RevokedToken.query.filter_by(token=token).first()
+
+        if not token:
+            return jsonify({'message' : 'Token not found!'}), 400
+
+        if invalid:
+            return jsonify({'message' : 'Invalid Token!'}), 400 
+
+        try:
+            data = jwt.decode(token, 'hjshjhdjh')
+            current_user = User.query.filter_by(public_id=data['public_id']).first()
+        except:
+            return jsonify({'message' : 'Invalid Token!'}), 400
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated                     
+
+@auth.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+    auth = request.authorization
 
-        user = User.query.filter_by(username=username).first()
-        if user:
-            if check_password_hash(user.password, password):
-                flash('Logged in successfully!', category='success')
-                login_user(user, remember=True)
-                return redirect(url_for('views.home'))
-            else:
-                flash('Incorrect password, try again.', category='error')
-        else:
-            flash('User does not exist.', category='error')
+    if not auth or not auth.username or not auth.password:
+        return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+  
+    user = User.query.filter_by(username=auth.username).first()
 
-    return render_template("login.html", user=current_user)
+    if not user:
+        return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+
+    if check_password_hash(user.password, auth.password):
+        token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, 'hjshjhdjh')
+        res = token.decode('UTF-8')
+        #return jsonify({'token' : res})
+        response = make_response(render_template('login.html'))
+        response.headers['X-OBSERVATORY-AUTH'] = res
+        return response
+
+    return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})    
+
+@auth.route('/admin/usermod/<new_username>/<new_password>', methods=['POST'])
+@token_required
+def usermod(current_user, new_username, new_password):
+    if not current_user.admin:
+        return jsonify({'message' : 'Not allowed to perform this action!'})
+
+    check = User.query.filter_by(username=new_username).first()
+
+    hashed_password = generate_password_hash(new_password, method='sha256')
+
+    if not check:
+        new_user = User(public_id=str(uuid.uuid4()), username=new_username, password=hashed_password, admin=False)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({'message' : 'New user successfully created!'})
+
+    check.password = new_password
+    db.session.add(check)
+    db.session.commit()
+
+    return jsonify({'message' : 'User password changed successfully!'})
+
+@auth.route('/logout', methods=['POST'])
+@token_made_black
+def logout(token):
+    black_token = RevokedToken(token=token)
+    db.session.add(black_token)
+    db.session.commit()
+
+    return jsonify({'message' : 'You have logged out!'})
 
 
-@auth.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('auth.login'))
-
-
-@auth.route('/sign-up', methods=['GET', 'POST'])
-def sign_up():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        first_name = request.form.get('firstName')
-        password1 = request.form.get('password1')
-        password2 = request.form.get('password2')
-
-        user = User.query.filter_by(username=username).first()
-        if user:
-            flash('Username already exists.', category='error')
-        elif len(username) < 2:
-            flash('Username must be greater than 1 character.', category='error')
-        elif len(first_name) < 2:
-            flash('First name must be greater than 1 character.', category='error')
-        elif password1 != password2:
-            flash('Passwords don\'t match.', category='error')
-        elif len(password1) < 5:
-            flash('Password must be at least 5 characters.', category='error')
-        else:
-            new_user = User(username=username, first_name=first_name, password=generate_password_hash(
-                password1, method='sha256'))
-            db.session.add(new_user)
-            db.session.commit()
-            login_user(new_user, remember=True)
-            flash('Account created!', category='success')
-            return redirect(url_for('views.home'))
-
-    return render_template("sign_up.html", user=current_user)
