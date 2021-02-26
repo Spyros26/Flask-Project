@@ -1,9 +1,11 @@
 from flask import Flask
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
 
 db = SQLAlchemy()
+migrate = Migrate()
 DB_NAME = "Data.db"
 
 
@@ -22,6 +24,7 @@ def create_app():
     from .models import User, ChargingSession
 
     create_database(App)
+    migrate.init_app(App, db)
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'

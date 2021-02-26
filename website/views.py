@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
+from .auth import token_required
 from .models import ChargingSession
 from . import db
 import json
@@ -8,8 +9,8 @@ views = Blueprint('views', __name__)
 
 
 @views.route('/', methods=['GET', 'POST'])
-@login_required
-def home():
+@token_required
+def home(current_user):
     if request.method == 'POST':
         charging_program = request.form.get('charging_program')
         EV = request.form.get('EV')
@@ -29,8 +30,8 @@ def home():
 
 
 @views.route('/charging', methods=['GET', 'POST'])
-@login_required
-def charging():
+@token_required
+def charging(current_user):
     if request.method == 'POST':
         flash('Charging stopped!', category='success')
         return redirect(url_for('views.home'))
@@ -39,8 +40,8 @@ def charging():
 
 
 @views.route('/issue-statement', methods=['GET', 'POST'])
-@login_required
-def view_sessions():
+@token_required
+def view_sessions(current_user):
     if request.method == 'POST':
         flash('The statement has been successfully issued!', category='success')
         return redirect(url_for('views.home'))

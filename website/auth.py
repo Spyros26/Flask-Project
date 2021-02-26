@@ -57,27 +57,27 @@ def token_required(f):
 
     return decorated                     
 
-@auth.route('/login', methods=['POST'])
+@auth.route('/login', methods=['GET', 'POST'])
 def login():
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+        return render_template('login.html')
   
     user = User.query.filter_by(username=auth.username).first()
 
     if not user:
-        return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+        return render_template('login.html')
 
     if check_password_hash(user.password, auth.password):
         token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, 'hjshjhdjh')
         res = token.decode('UTF-8')
-        #return jsonify({'token' : res})
-        response = make_response(render_template('login.html'))
-        response.headers['X-OBSERVATORY-AUTH'] = res
+        return jsonify({'token' : res})
+        #response = make_response(render_template('login.html'))
+        #response.headers['X-OBSERVATORY-AUTH'] = res
         return response
 
-    return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})    
+    return render_template('login.html')    
 
 @auth.route('/admin/usermod/<new_username>/<new_password>', methods=['POST'])
 @token_required
@@ -96,7 +96,7 @@ def usermod(current_user, new_username, new_password):
 
         return jsonify({'message' : 'New user successfully created!'})
 
-    check.password = new_password
+    check.password = hashed_password
     db.session.add(check)
     db.session.commit()
 
