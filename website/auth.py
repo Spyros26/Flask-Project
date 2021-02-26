@@ -62,12 +62,12 @@ def login():
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return render_template('login.html')
+        return render_template('login.html', user=current_user)
   
     user = User.query.filter_by(username=auth.username).first()
 
     if not user:
-        return render_template('login.html')
+        return render_template('login.html', user=current_user)
 
     if check_password_hash(user.password, auth.password):
         token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, 'hjshjhdjh')
@@ -77,7 +77,7 @@ def login():
         #response.headers['X-OBSERVATORY-AUTH'] = res
         return response
 
-    return render_template('login.html')    
+    return render_template('login.html', user=current_user)    
 
 @auth.route('/admin/usermod/<new_username>/<new_password>', methods=['POST'])
 @token_required
