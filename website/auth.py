@@ -72,10 +72,7 @@ def login():
     if check_password_hash(user.password, auth.password):
         token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, 'hjshjhdjh')
         res = token.decode('UTF-8')
-        #return jsonify({'token' : res})
-        response = make_response(render_template('login.html'))
-        response.headers['X-OBSERVATORY-AUTH'] = res
-        return response
+        return jsonify({'token' : res})
 
     return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})    
 
