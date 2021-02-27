@@ -1,6 +1,7 @@
 from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import JSON
 
 
 class ChargingSession(db.Model):
@@ -21,4 +22,18 @@ class User(db.Model, UserMixin):
 
 class RevokedToken(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    token = db.Column(db.String(150))    
+    token = db.Column(db.String(150))
+
+class EVehicle(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    car_id = db.Column(db.String(100), unique=True)
+    brand = db.Column(db.String(20))
+    car_type = db.Column(db.String(10))
+    brand_id = db.Column(db.String(100))
+    model = db.Column(db.String(40))
+    release_year = db.Column(db.Integer)
+    variant = db.Column(db.String(20))
+    usable_battery_size = db.Column(db.Float)
+    ac_charger = db.Column(JSON)
+    dc_charger = db.Column(JSON)
+    energy_consumption = db.Column(JSON)

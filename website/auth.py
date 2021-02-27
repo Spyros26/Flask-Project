@@ -73,9 +73,12 @@ def login():
         token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, 'hjshjhdjh')
         res = token.decode('UTF-8')
         return jsonify({'token' : res})
+<<<<<<< HEAD
         #response = make_response(render_template('login.html'))
         #response.headers['X-OBSERVATORY-AUTH'] = res
         return response
+=======
+>>>>>>> 823f8208d008136d8b96895f0249a54adc47b41f
 
     return render_template('login.html', user=current_user)    
 
