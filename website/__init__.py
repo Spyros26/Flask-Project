@@ -1,9 +1,8 @@
-<<<<<<< HEAD
 from flask import Flask
 from flask_migrate import Migrate
-=======
+
 from flask import Flask, jsonify
->>>>>>> 823f8208d008136d8b96895f0249a54adc47b41f
+
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
