@@ -28,7 +28,7 @@ def create_app():
     App.register_blueprint(views, url_prefix='/')
     App.register_blueprint(auth, url_prefix='/')
 
-    from .models import User, ChargingSession
+    from .models import User, ChargingSession, RevokedToken, EVehicle
 
     create_database(App)
     migrate.init_app(App, db)
