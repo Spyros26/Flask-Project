@@ -17,7 +17,7 @@ class User(db.Model, UserMixin):
     public_id = db.Column(db.String(50), unique=True)
     username = db.Column(db.String(40), unique=True)
     password = db.Column(db.String(60))
-    admin = db.Column(db.Boolean)
+    is_admin = db.Column(db.Boolean)
     charging_sessions = db.relationship('ChargingSession')
 
 class RevokedToken(db.Model):

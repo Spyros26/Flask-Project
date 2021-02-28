@@ -5,7 +5,7 @@ from flask import Flask, jsonify
 
 from flask_sqlalchemy import SQLAlchemy
 from os import path
-from flask_login import LoginManager
+
 import uuid
 from werkzeug.security import generate_password_hash
 import pandas as pd
@@ -24,23 +24,16 @@ def create_app():
 
     from .views import views
     from .auth import auth
+    from .admin import admin
 
     App.register_blueprint(views, url_prefix='/')
+    App.register_blueprint(admin, url_prefix='/')
     App.register_blueprint(auth, url_prefix='/')
 
     from .models import User, ChargingSession, RevokedToken, EVehicle
 
     create_database(App)
     migrate.init_app(App, db)
-
-    login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'
-    login_manager.init_app(App)
-
-    @login_manager.user_loader
-    def load_user(id):
-        return User.query.get(int(id))
-
 
     return App
 
@@ -56,7 +49,7 @@ def default_admin(username, password):
     user = User.query.filter_by(username=username).first()
     if not user:
         hashed_password = generate_password_hash(password, method='sha256')
-        admin = User(public_id=str(uuid.uuid4()), username=username, password=hashed_password, admin=True)
+        admin = User(public_id=str(uuid.uuid4()), username=username, password=hashed_password, is_admin=True)
         db.session.add(admin)
         db.session.commit()
         print('Default admin created!')

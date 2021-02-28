@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, make_response
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, Response, make_response
 from .models import User, RevokedToken
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
@@ -59,45 +59,20 @@ def token_required(f):
 
 @auth.route('/login', methods=['POST'])
 def login():
-    auth = request.authorization
-
-    if not auth or not auth.username or not auth.password:
-        return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-  
-    user = User.query.filter_by(username=auth.username).first()
+    username = request.form.get('username')
+    password = request.form.get('password')
+    user = User.query.filter_by(username=username).first()
 
     if not user:
         return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-    if check_password_hash(user.password, auth.password):
+    if check_password_hash(user.password, password):
         token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, 'hjshjhdjh')
         res = token.decode('UTF-8')
         return jsonify({'token' : res})
 
-    return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})  
+    return make_response('Could not verify', 400, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-@auth.route('/admin/usermod/<new_username>/<new_password>', methods=['POST'])
-@token_required
-def usermod(current_user, new_username, new_password):
-    if not current_user.admin:
-        return jsonify({'message' : 'Not allowed to perform this action!'})
-
-    check = User.query.filter_by(username=new_username).first()
-
-    hashed_password = generate_password_hash(new_password, method='sha256')
-
-    if not check:
-        new_user = User(public_id=str(uuid.uuid4()), username=new_username, password=hashed_password, admin=False)
-        db.session.add(new_user)
-        db.session.commit()
-
-        return jsonify({'message' : 'New user successfully created!'})
-
-    check.password = hashed_password
-    db.session.add(check)
-    db.session.commit()
-
-    return jsonify({'message' : 'User password changed successfully!'})
 
 @auth.route('/logout', methods=['POST'])
 @token_made_black
@@ -106,6 +81,6 @@ def logout(token):
     db.session.add(black_token)
     db.session.commit()
 
-    return jsonify({'message' : 'You have logged out!'})
+    return Response(status=200)
 
 
