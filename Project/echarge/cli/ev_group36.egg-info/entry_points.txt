@@ -1,0 +1,3 @@
+[console_scripts]
+ev_group36 = ev_group36.cli:cli
+

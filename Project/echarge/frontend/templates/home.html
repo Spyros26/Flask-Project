@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+<h1 align="center">Charge</h1>
+<form method="POST">
+  <div class="form-group">
+    <label for="EV">EV</label>
+    <input
+      type="text"
+      class="form-control"
+      id="EV"
+      name="EV"
+      placeholder="Enter EV you want to charge"
+    />
+  </div>
+  <div class="form-group">
+    <label for="charging_program">Charging Program</label>
+    <input
+      type="integer"
+      class="form-control"
+      id="charging_program"
+      name="charging_program"
+      placeholder="Enter Charging Program"
+    />
+  </div>
+  
+  <br />
+  <div align="center">
+    <button type="submit" class="btn btn-primary">Charge</button>
+  </div>
+</form>
+{% endblock %}

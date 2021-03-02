@@ -1,0 +1,13 @@
+{% extends "base.html" %} {% block title %}Charging...{% endblock %}
+{% block content %}
+<h1 align="center">Charging...</h1>
+<div align="center">
+    <div class="progress-bar" style="--width: 0" data-label="Charging..."></div>
+</div>
+<form method="POST"> 
+  <br />
+  <div align="center">
+    <button type="submit" class="btn btn-primary">Stop Charging</button>
+  </div>
+</form>
+{% endblock %}
