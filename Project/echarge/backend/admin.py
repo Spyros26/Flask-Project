@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, Response, make_response
-from ..models import User, ChargingSession
+from ..models import User, Session
 from werkzeug.security import generate_password_hash, check_password_hash
 from .. import db, default_admin
 import uuid
@@ -53,14 +53,9 @@ def healthcheck(current_user):
 
     try:
         cnt = User.query.count()
-        success = True
-    except:
-        success = False
-
-    if success:
         return jsonify({'status' : 'OK'})
-
-    return jsonify({'status' : 'failed'})
+    except:
+        return jsonify({'status' : 'failed'})
 
 
 @admin.route('/admin/resetsessions', methods=['POST'])
@@ -70,14 +65,9 @@ def resetsessions(current_user):
         return jsonify({'message' : 'Not allowed to perform this action!'})
 
     try:
-        num_sessions_deleted = db.session.query(ChargingSession).delete()
+        num_sessions_deleted = db.session.query(Session).delete()
         db.session.commit()
         default_admin('admin','petrol4ever')
-        success = True
-    except:
-        success = False
-
-    if success:
         return jsonify({'status' : 'OK'})
-
-    return jsonify({'status' : 'failed'})
+    except:
+        return jsonify({'status' : 'failed'})

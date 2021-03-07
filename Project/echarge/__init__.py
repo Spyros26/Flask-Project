@@ -10,6 +10,8 @@ import uuid
 from werkzeug.security import generate_password_hash
 import pandas as pd
 import json
+import numpy as np
+import random
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -28,7 +30,7 @@ def create_app():
     App.register_blueprint(admin, url_prefix='/')
     App.register_blueprint(auth, url_prefix='/')
 
-    from .models import User, ChargingSession, RevokedToken, EVehicle
+    from .models import User, Session, RevokedToken, EVehicle, Point, Station, Operator
 
     create_database(App)
     migrate.init_app(App, db)
@@ -59,7 +61,7 @@ def default_admin(username, password):
 
 def default_evs(filename):
     
-    from .models import EVehicle
+    from .models import EVehicle, User
 
     with open(filename) as jsdata:
         evs = json.load(jsdata)
@@ -72,11 +74,147 @@ def default_evs(filename):
     for x in range(0,length):
         check = EVehicle.query.filter_by(car_id=cont["id"][x]).first()
         if not check:
+            user = User.query.filter_by(username=f"User{x+1}").first()
             new_ev = EVehicle(car_id=cont["id"][x], brand=cont["brand"][x], 
                         car_type=cont["type"][x], brand_id=cont["brand_id"][x],
                         model=cont["model"][x], release_year=cont["release_year"][x],
                         variant=cont["variant"][x], usable_battery_size=cont["usable_battery_size"][x],
                         ac_charger=cont["ac_charger"][x], dc_charger=cont["dc_charger"][x],
-                        energy_consumption=cont["energy_consumption"][x])
+                        energy_consumption=cont["energy_consumption"][x], user_id=user.id)
             db.session.add(new_ev)
-            db.session.commit()            
+            db.session.commit()
+    print('Default EVs are in')                    
+
+def default_operators(filename):
+
+    from .models import Operator
+
+    df = pd.read_csv(filename, sep=";")
+    #print(df)
+    length = df.shape[0]
+    #print(length)
+
+    for a, x in df.iterrows():
+        check = Operator.query.filter_by(operator_id=x["ID"]).first()
+        if not check:
+            new_op = Operator(operator_id=x["ID"], name=x["Title"], 
+                        website=x["WebsiteURL"], email=x["ContactEmail"])            
+            db.session.add(new_op)
+            db.session.commit()
+    print('Default operators are in')        
+    
+def default_points_stations(filename):
+
+    from .models import Station, Point
+    
+    col_list = ["_id", "AddressInfo.AddressLine1", "AddressInfo.Latitude", "AddressInfo.Longitude"]
+
+    df = pd.read_csv(filename, sep=",", nrows=2000, usecols=col_list)
+    #print(df)
+    length = df.shape[0]
+    #print(length)
+
+    for _, x in df.iterrows():
+        if isinstance(x["AddressInfo.AddressLine1"], str) and isinstance(x["_id"], str):
+
+            check = Station.query.filter_by(address=x["AddressInfo.AddressLine1"]).first()
+            if not check:
+                #print(x["AddressInfo.AddressLine1"])
+                new_station = Station(station_id=str(uuid.uuid4()), address=x["AddressInfo.AddressLine1"], 
+                            latitude=x["AddressInfo.Latitude"], longitude=x["AddressInfo.Longitude"])            
+                this_station = new_station
+                db.session.add(new_station)
+                db.session.commit()
+            else:
+                #print(x["AddressInfo.AddressLine1"])
+                this_station = check    
+            check2 = Point.query.filter_by(point_id=x["_id"]).first()
+            if not check2:
+                #print(x['_id'])
+                new_point = Point(point_id=x["_id"], station_id=this_station.id)
+                db.session.add(new_point)
+                db.session.commit()
+
+    print('Points and Stations are in')            
+
+
+def default_users():
+
+    from .models import User
+
+    for x in range(1,144):
+        username = f"User{x}"
+        password = f"password{x}"
+        hashed_password = generate_password_hash(password, method='sha256')
+        check = User.query.filter_by(username=username).first()
+        if not check:
+            new_user = User(public_id=str(uuid.uuid4()), username=username,
+                            password=hashed_password, is_admin=False)
+            db.session.add(new_user)
+            db.session.commit()
+    print('Default users are in')
+
+def default_sessions(filename):
+
+    from .models import Session, User, Point
+
+    with open(filename) as jsdata:
+        sess = json.load(jsdata)
+
+    cont = pd.DataFrame(sess['_items'])    
+    #cont = pd.read_json(filename)
+    length = cont.shape[0]
+    #print(cont)
+    #print(length)
+    #table = User.query.limit(10).all()
+    #for x in range(0,10):
+        #print(random.choice(table))
+
+    user_table = User.query.all()
+    point_table = Point.query.all()
+
+    #for x in range(0,length):
+    for x in range(0,500):
+        check = Session.query.filter_by(session_id=cont["_id"][x]).first()
+        if not check:
+            edit_start = cont["connectionTime"][x]
+            year_start = edit_start[12:16]
+            month_start = months_to_nums(edit_start[8:11])
+            day_start = edit_start[5:7]
+            time_start = edit_start[17:]
+            edit_fin = cont["disconnectTime"][x]
+            year_fin = edit_fin[12:16]
+            month_fin = months_to_nums(edit_fin[8:11])
+            day_fin = edit_fin[5:7]
+            time_fin = edit_fin[17:]
+            user = random.choice(user_table)
+            point = random.choice(point_table)
+
+
+            new_session = Session(session_id=cont["_id"][x], connection_date=year_start+month_start+day_start,
+                                connection_time=time_start,  disconnection_date=year_fin+month_fin+day_fin,
+                                disconnection_time=time_fin, kWh_delivered = cont["kWhDelivered"][x],
+                                user_id=user.id, point_id=point.id)
+            db.session.add(new_session)
+            #print(new_session.connection_date)
+            db.session.commit()
+    print('Sessions are in')
+
+def months_to_nums(x):
+    
+    switcher = {
+        "Jan": "01",
+        "Feb": "02",
+        "Mar": "03",
+        "Apr": "04",
+        "May": "05",
+        "Jun": "06",
+        "Jul": "07",
+        "Aug": "08",
+        "Sep": "09",
+        "Oct": "10",
+        "Nov": "11",
+        "Dec": "12"
+    }
+    return switcher.get(x, "???")
+

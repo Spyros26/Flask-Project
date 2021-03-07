@@ -1,13 +1,13 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import current_user
 from .auth import token_required
-from ..models import ChargingSession
+from ..models import Session
 from .. import db
 import json
 
 views = Blueprint('views', __name__)
 
-
+"""
 @views.route('/', methods=['GET', 'POST'])
 @token_required
 def home(current_user):
@@ -61,5 +61,5 @@ def delete_session():
 
     return jsonify({})
 
-
+"""
 
