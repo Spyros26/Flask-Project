@@ -3,7 +3,7 @@ from echarge import create_app, default_admin, default_evs, default_operators, d
 app = create_app()
 db.app = app
 default_admin('admin','petrol4ever')
-#default_operators('echarge/Operators_data.csv')
+default_operators('echarge/Operators_data.csv')
 default_points_stations('echarge/points.csv')
 default_users()
 default_evs('echarge/electric_vehicles_data.json')

@@ -22,15 +22,17 @@ def create_app():
     App = Flask(__name__, template_folder='./frontend/templates')
     App.config['SECRET_KEY'] = 'hjshjhdjh'
     App.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    App.config['JSON_SORT_KEYS'] = False
     db.init_app(App)
 
-    from echarge.backend import views, auth, admin
+    from echarge.backend import views, auth, admin, sessions
 
     App.register_blueprint(views, url_prefix='/')
     App.register_blueprint(admin, url_prefix='/')
     App.register_blueprint(auth, url_prefix='/')
+    App.register_blueprint(sessions, url_prefix='/')
 
-    from .models import User, Session, RevokedToken, EVehicle, Point, Station, Operator
+    from .models import User, RevokedToken, Evehicle, Point, Station, Operator, Session
 
     create_database(App)
     migrate.init_app(App, db)
@@ -49,7 +51,7 @@ def default_admin(username, password):
     user = User.query.filter_by(username=username).first()
     if not user:
         hashed_password = generate_password_hash(password, method='sha256')
-        admin = User(public_id=str(uuid.uuid4()), username=username, password=hashed_password, is_admin=True)
+        admin = User(public_id=str(uuid.uuid4()), username=username, password=hashed_password, role="Admin")
         db.session.add(admin)
         db.session.commit()
         print('Default admin created!')
@@ -61,7 +63,7 @@ def default_admin(username, password):
 
 def default_evs(filename):
     
-    from .models import EVehicle, User
+    from .models import Evehicle, User
 
     with open(filename) as jsdata:
         evs = json.load(jsdata)
@@ -72,10 +74,10 @@ def default_evs(filename):
     #print(cont)
     #print(length)
     for x in range(0,length):
-        check = EVehicle.query.filter_by(car_id=cont["id"][x]).first()
+        check = Evehicle.query.filter_by(car_id=cont["id"][x]).first()
         if not check:
             user = User.query.filter_by(username=f"User{x+1}").first()
-            new_ev = EVehicle(car_id=cont["id"][x], brand=cont["brand"][x], 
+            new_ev = Evehicle(car_id=cont["id"][x], brand=cont["brand"][x], 
                         car_type=cont["type"][x], brand_id=cont["brand_id"][x],
                         model=cont["model"][x], release_year=cont["release_year"][x],
                         variant=cont["variant"][x], usable_battery_size=cont["usable_battery_size"][x],
@@ -105,14 +107,16 @@ def default_operators(filename):
     
 def default_points_stations(filename):
 
-    from .models import Station, Point
+    from .models import Station, Point, Operator
     
     col_list = ["_id", "AddressInfo.AddressLine1", "AddressInfo.Latitude", "AddressInfo.Longitude"]
 
-    df = pd.read_csv(filename, sep=",", nrows=2000, usecols=col_list)
+    df = pd.read_csv(filename, sep=",", nrows=100, usecols=col_list)
     #print(df)
     length = df.shape[0]
     #print(length)
+
+    operator_table = Operator.query.all()
 
     for _, x in df.iterrows():
         if isinstance(x["AddressInfo.AddressLine1"], str) and isinstance(x["_id"], str):
@@ -120,8 +124,10 @@ def default_points_stations(filename):
             check = Station.query.filter_by(address=x["AddressInfo.AddressLine1"]).first()
             if not check:
                 #print(x["AddressInfo.AddressLine1"])
+                operator = random.choice(operator_table)
                 new_station = Station(station_id=str(uuid.uuid4()), address=x["AddressInfo.AddressLine1"], 
-                            latitude=x["AddressInfo.Latitude"], longitude=x["AddressInfo.Longitude"])            
+                            latitude=x["AddressInfo.Latitude"], longitude=x["AddressInfo.Longitude"],
+                            operator_id=operator.id)            
                 this_station = new_station
                 db.session.add(new_station)
                 db.session.commit()
@@ -149,14 +155,25 @@ def default_users():
         check = User.query.filter_by(username=username).first()
         if not check:
             new_user = User(public_id=str(uuid.uuid4()), username=username,
-                            password=hashed_password, is_admin=False)
+                            password=hashed_password, role="User")
             db.session.add(new_user)
             db.session.commit()
+
+    for x in range(1,21):
+        username = f"Stakeholder{x}"
+        password = f"stakepassholder{x}"
+        hashed_password = generate_password_hash(password, method='sha256')
+        check = User.query.filter_by(username=username).first()
+        if not check:
+            new_user = User(public_id=str(uuid.uuid4()), username=username,
+                            password=hashed_password, role="Stakeholder")
+            db.session.add(new_user)
+            db.session.commit()                        
     print('Default users are in')
 
 def default_sessions(filename):
 
-    from .models import Session, User, Point
+    from .models import Session, Evehicle, Point
 
     with open(filename) as jsdata:
         sess = json.load(jsdata)
@@ -170,8 +187,11 @@ def default_sessions(filename):
     #for x in range(0,10):
         #print(random.choice(table))
 
-    user_table = User.query.all()
+    ev_table = Evehicle.query.all()
     point_table = Point.query.all()
+
+    payment_table = ["Credit_Card", "Debit_Card", "Smartphone_Wallet",
+                    "Website_Payment", "QR_Code", "Cash"]
 
     #for x in range(0,length):
     for x in range(0,500):
@@ -182,19 +202,37 @@ def default_sessions(filename):
             month_start = months_to_nums(edit_start[8:11])
             day_start = edit_start[5:7]
             time_start = edit_start[17:]
-            edit_fin = cont["disconnectTime"][x]
+            edit_fin = cont["doneChargingTime"][x]
             year_fin = edit_fin[12:16]
             month_fin = months_to_nums(edit_fin[8:11])
             day_fin = edit_fin[5:7]
             time_fin = edit_fin[17:]
-            user = random.choice(user_table)
+            
+            begin = int(time_start[:2])*60+int(time_start[3:5])
+            end = 0
+            if day_start!=day_fin:
+                end = 1440
+            end = end + int(time_fin[:2])*60+int(time_fin[3:5])
+            space = end - begin
+            if space==0:
+                space = 1
+            rate = (cont["kWhDelivered"][x]*60)/space
+            if rate < 2.0:
+                protocol = "Level 1: Low"
+            elif rate < 10.0:
+                protocol = "Level 2: Medium"
+            else:
+                protocol = "Level 3: High"             
+            
+            ev = random.choice(ev_table)
             point = random.choice(point_table)
+            payment = random.choice(payment_table)
 
 
             new_session = Session(session_id=cont["_id"][x], connection_date=year_start+month_start+day_start,
                                 connection_time=time_start,  disconnection_date=year_fin+month_fin+day_fin,
                                 disconnection_time=time_fin, kWh_delivered = cont["kWhDelivered"][x],
-                                user_id=user.id, point_id=point.id)
+                                protocol=protocol ,payment=payment ,ev_id=ev.id, point_id=point.id)
             db.session.add(new_session)
             #print(new_session.connection_date)
             db.session.commit()
