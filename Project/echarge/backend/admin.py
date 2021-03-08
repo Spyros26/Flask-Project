@@ -42,7 +42,7 @@ def users(current_user, username):
     if not user:
         return jsonify({'message' : 'The user was not found!'})
 
-    return jsonify({'Username' : user.username, 'hashed_password' : user.password, 'role' : user.role})
+    return jsonify({'username' : user.username, 'hashed_password' : user.password, 'role' : user.role})
 
 
 @admin.route('/admin/healthcheck', methods=['GET'])
