@@ -90,7 +90,6 @@ def sessions_update(current_user):
     cont = pd.DataFrame(sess['_items'])
     length = cont.shape[0]    
     sessions_imported = 0
-    sessions_in_file = 0
     sessions_in_db = 0
 
     ev_table = Evehicle.query.all()
@@ -143,9 +142,8 @@ def sessions_update(current_user):
             #print(new_session.connection_date)
             db.session.commit()
             sessions_imported = sessions_imported + 1
-        sessions_in_file = sessions_in_file + 1
     
     sessions_in_db = Session.query.count()
-    return jsonify({'SessionsInUploadedFile' : sessions_in_file,
+    return jsonify({'SessionsInUploadedFile' : length,
                     'SessionsImported' : sessions_imported,
                     'TotalSessionsInDatabase' : sessions_in_db})
