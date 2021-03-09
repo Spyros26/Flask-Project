@@ -17,7 +17,6 @@ def cli(ctx, apikey):
 
 
 @cli.command()
-@token_required
 @click.pass_context
 def logout(ctx):
     response = requests.post(url, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})

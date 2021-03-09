@@ -41,7 +41,7 @@ def create_app():
 
 
 def create_database(app):
-    if not path.exists('e-charge/' + DB_NAME):
+    if not path.exists('echarge/' + DB_NAME):
         db.create_all(app=app)
         print('Created Database!')
 
@@ -109,7 +109,7 @@ def default_points_stations(filename):
 
     from .models import Station, Point, Operator
     
-    col_list = ["_id", "AddressInfo.AddressLine1", "AddressInfo.Latitude", "AddressInfo.Longitude"]
+    col_list = ["_id", "AddressInfo.ID", "AddressInfo.AddressLine1", "AddressInfo.Latitude", "AddressInfo.Longitude"]
 
     df = pd.read_csv(filename, sep=",", nrows=100, usecols=col_list)
     #print(df)
@@ -125,7 +125,7 @@ def default_points_stations(filename):
             if not check:
                 #print(x["AddressInfo.AddressLine1"])
                 operator = random.choice(operator_table)
-                new_station = Station(station_id=str(uuid.uuid4()), address=x["AddressInfo.AddressLine1"], 
+                new_station = Station(station_id=str(x["AddressInfo.ID"]), address=x["AddressInfo.AddressLine1"], 
                             latitude=x["AddressInfo.Latitude"], longitude=x["AddressInfo.Longitude"],
                             operator_id=operator.id)            
                 this_station = new_station
@@ -255,4 +255,12 @@ def months_to_nums(x):
         "Dec": "12"
     }
     return switcher.get(x, "???")
+
+def initializer():
+    default_admin('admin','petrol4ever')
+    default_operators('echarge/backend/static/Operators_data.csv')
+    default_points_stations('echarge/backend/static/points.csv')
+    default_users()
+    default_evs('echarge/backend/static/electric_vehicles_data.json')
+    #default_sessions('echarge/backend/static/caltech_acndata_sessions_12month.json')
 
