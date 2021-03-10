@@ -2,13 +2,19 @@
 %}
 <h1 align="center">Your Charging Sessions</h1>
 <ul class="list-group list-group-flush" id="charging_sessions">
-  {% for charging_session in user.charging_sessions %}
+  {% for charging_session in user.evs[0].sessions %}
   <li class="list-group-item">
-    EV: {{ charging_session.EV }} 
+    EV: {{ user.evs[0].brand + " " + user.evs[0].model  }} 
     <br />
-    date: {{ charging_session.date }}
+    connection_start: {{ charging_session.connection_date + " " + charging_session.connection_time }}
     <br />
-    Charging program: {{ charging_session.charging_program }} 
+    connection_finish: {{ charging_session.disconnection_date + " " + charging_session.disconnection_time }}
+    <br />
+    kWh_delivered: {{ charging_session.kWh_delivered }}
+    <br />
+    protocol: {{ charging_session.protocol }}
+    <br />
+    payment: {{ charging_session.payment }}
     <button type="button" class="close" onClick="deleteSession({{ charging_session.id }})">
       <span aria-hidden="true">&times;</span>
     </button>
