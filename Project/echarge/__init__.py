@@ -115,7 +115,7 @@ def default_operators(filename):
     
 def default_points_stations(filename):
 
-    from .models import Station, Point, Operator
+    from .models import Station, Point, Operator, Energyprovider
     
     col_list = ["_id", "AddressInfo.ID", "AddressInfo.AddressLine1", "AddressInfo.Latitude", "AddressInfo.Longitude"]
 
@@ -125,6 +125,7 @@ def default_points_stations(filename):
     #print(length)
 
     operator_table = Operator.query.all()
+    provider_table = Energyprovider.query.all()
 
     for _, x in df.iterrows():
         if isinstance(x["AddressInfo.AddressLine1"], str) and isinstance(x["_id"], str):
@@ -133,9 +134,10 @@ def default_points_stations(filename):
             if not check:
                 #print(x["AddressInfo.AddressLine1"])
                 operator = random.choice(operator_table)
+                provider = random.choice(provider_table)
                 new_station = Station(station_id=str(x["AddressInfo.ID"]), address=x["AddressInfo.AddressLine1"], 
                             latitude=x["AddressInfo.Latitude"], longitude=x["AddressInfo.Longitude"],
-                            operator_id=operator.id)            
+                            operator_id=operator.id, provider_id=provider.id)            
                 this_station = new_station
                 db.session.add(new_station)
                 db.session.commit()
@@ -168,13 +170,13 @@ def default_users():
             db.session.commit()
 
     for x in range(1,21):
-        username = f"Stakeholder{x}"
-        password = f"stakepassholder{x}"
+        username = f"Privileged{x}"
+        password = f"privypass{x}"
         hashed_password = generate_password_hash(password, method='sha256')
         check = User.query.filter_by(username=username).first()
         if not check:
             new_user = User(public_id=str(uuid.uuid4()), username=username,
-                            password=hashed_password, role="Stakeholder")
+                            password=hashed_password, role="Privileged")
             db.session.add(new_user)
             db.session.commit()                        
     print('Default users are in')
@@ -209,25 +211,32 @@ def default_sessions(filename):
             year_start = edit_start[12:16]
             month_start = months_to_nums(edit_start[8:11])
             day_start = edit_start[5:7]
-            time_start = edit_start[17:]
+            time_start = edit_start[17:19]+edit_start[20:22]+edit_start[23:25]
+
             edit_fin = cont["doneChargingTime"][x]
             year_fin = edit_fin[12:16]
             month_fin = months_to_nums(edit_fin[8:11])
             day_fin = edit_fin[5:7]
-            time_fin = edit_fin[17:]
+            time_fin = edit_fin[17:19]+edit_fin[20:22]+edit_fin[23:25]
             
-            begin = int(time_start[:2])*60+int(time_start[3:5])
+            edit_dis = cont["disconnectTime"][x]
+            year_dis = edit_dis[12:16]
+            month_dis = months_to_nums(edit_dis[8:11])
+            day_dis = edit_dis[5:7]
+            time_dis = edit_dis[17:19]+edit_dis[20:22]+edit_dis[23:25]
+
+            begin = int(time_start[:2])*60+int(time_start[2:4])
             end = 0
             if day_start!=day_fin:
                 end = 1440
-            end = end + int(time_fin[:2])*60+int(time_fin[3:5])
+            end = end + int(time_fin[:2])*60+int(time_fin[2:4])
             space = end - begin
             if space==0:
                 space = 1
             rate = (cont["kWhDelivered"][x]*60)/space
-            if rate < 2.0:
+            if rate < 5.0:
                 protocol = "Level 1: Low"
-            elif rate < 10.0:
+            elif rate < 25.0:
                 protocol = "Level 2: Medium"
             else:
                 protocol = "Level 3: High"             
@@ -238,8 +247,9 @@ def default_sessions(filename):
 
 
             new_session = Session(session_id=cont["_id"][x], connection_date=year_start+month_start+day_start,
-                                connection_time=time_start,  disconnection_date=year_fin+month_fin+day_fin,
-                                disconnection_time=time_fin, kWh_delivered = cont["kWhDelivered"][x],
+                                connection_time=time_start,  done_date=year_fin+month_fin+day_fin,
+                                done_time=time_fin, disconnection_date=year_dis+month_dis+day_dis,
+                                disconnection_time=time_dis, kWh_delivered = cont["kWhDelivered"][x],
                                 protocol=protocol ,payment=payment ,ev_id=ev.id, point_id=point.id)
             db.session.add(new_session)
             #print(new_session.connection_date)
@@ -264,15 +274,52 @@ def months_to_nums(x):
     }
     return switcher.get(x, "???")
 
+def default_providers():
+
+    from .models import Energyprovider
+
+    us_table = [
+        "4Change Energy",
+        "AEP Energy",
+        "Ambit energy",
+        "Amigo Energy",
+        "Beyond Power",
+        "Bounce Energy",
+        "Champion Energy Services",
+        "Cirro Energy",
+        "Constellation",
+        "CPL Retail Energy",
+        "Direct Energy",
+        "FirstEnergy Solutions",
+        "First Choice Power",
+        "Gexa Energy",
+        "Green Mountain Energy",
+        "IGS Energy",
+        "Infinite Energy",
+        "Inspire Energy",
+        "Just Energy",
+        "Liberty Power",
+        "North American Power",
+        "Pennywise Power",
+        "StarTex Power",
+        "TriEagle Energy",
+        "WGL Energy"
+    ]
+    for x in range(0,len(us_table)):
+        prov = Energyprovider.query.filter_by(name=us_table[x]).first()
+        if not prov:
+            new_provider = Energyprovider(provider_id=f"0987654321{x+1}", name=us_table[x])
+            db.session.add(new_provider)
+            db.session.commit()
+    print("Default providers are in!")    
+
+
 def initializer():
     default_admin('admin','petrol4ever')
+    default_providers()
     default_operators('echarge/backend/static/Operators_data.csv')
     default_points_stations('echarge/backend/static/points.csv')
     default_users()
     default_evs('echarge/backend/static/electric_vehicles_data.json')
-<<<<<<< HEAD
     default_sessions('echarge/backend/static/caltech_acndata_sessions_12month.json')
-=======
-    #default_sessions('echarge/backend/static/caltech_acndata_sessions_12month.json')
->>>>>>> dff3f493bdabf268de6dd0bbcb8f2f352953952d
 

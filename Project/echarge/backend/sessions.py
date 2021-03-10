@@ -46,7 +46,7 @@ def ses_per_point(current_user, pointID, date_from, date_to):
 
     operator = Operator.query.get(station.operator_id)
 
-    pool = Session.query.filter((Session.point_id==point.id) & (Session.connection_date>=date_from) & (Session.disconnection_date<=date_to)).all()
+    pool = Session.query.filter((Session.point_id==point.id) & (Session.connection_date>=date_from) & (Session.done_date<=date_to)).all()
     pool.sort(key=sort_criteria)
     for sample in pool:
         #if int(sample.connection_date)>=int(date_from) and int(sample.disconnection_date)<=int(date_to):
@@ -55,7 +55,7 @@ def ses_per_point(current_user, pointID, date_from, date_to):
         year_start = edit_start[:4]
         month_start = nums_to_months(edit_start[4:6])
         day_start = edit_start[6:]
-        edit_fin = sample.disconnection_date
+        edit_fin = sample.done_date
         year_fin = edit_fin[:4]
         month_fin = nums_to_months(edit_fin[4:6])
         day_fin = edit_fin[6:]
@@ -65,7 +65,7 @@ def ses_per_point(current_user, pointID, date_from, date_to):
 
         ses_list.append({'SessionIndex': aa, 'SessionID': sample.session_id, 
                         'StartedOn': year_start+" "+month_start+" "+day_start+" "+sample.connection_time,
-                        'FinishedOn': year_fin+" "+month_fin+" "+day_fin+" "+sample.disconnection_time,
+                        'FinishedOn': year_fin+" "+month_fin+" "+day_fin+" "+sample.done_time,
                         'EnergyDelivered': sample.kWh_delivered, 'Protocol': sample.protocol,
                         'Payment': sample.payment ,'VehicleType': ev.car_type})
         aa = aa + 1
@@ -92,7 +92,7 @@ def ses_per_station(current_user, stationID, date_from, date_to):
 
     for point in station.points:
         total_kWh_point = 0
-        pool = Session.query.filter((Session.point_id==point.id) & (Session.connection_date>=date_from) & (Session.disconnection_date<=date_to)).all()
+        pool = Session.query.filter((Session.point_id==point.id) & (Session.connection_date>=date_from) & (Session.done_date<=date_to)).all()
         
         if len(pool) != 0:
             pool.sort(key=sort_criteria)
@@ -111,11 +111,6 @@ def ses_per_station(current_user, stationID, date_from, date_to):
                     'PeriodFrom': date_from[:4]+" "+nums_to_months(date_from[4:6])+" "+date_from[6:],
                     'PeriodTo': date_to[:4]+" "+nums_to_months(date_to[4:6])+" "+date_to[6:],
                     'TotalEnergyDelivered' : total_kWh_station,
-<<<<<<< HEAD
-                    'NumberofChargingSessions' : total_sessions,
-                    'NumberofActivePoints' : len(points_list),
-                    'SessionsSummaryList': points_list})                        
-=======
                     'NumberOfChargingSessions' : total_sessions,
                     'NumberOfActivePoints' : len(points_list),
                     'SessionsSummaryList': points_list})            
@@ -136,7 +131,7 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
     aa = 1
     visited_points = []
 
-    pool = Session.query.filter((Session.ev_id==ev.id) & (Session.connection_date>=date_from) & (Session.disconnection_date<=date_to)).all()
+    pool = Session.query.filter((Session.ev_id==ev.id) & (Session.connection_date>=date_from) & (Session.done_date<=date_to)).all()
     pool.sort(key=sort_criteria)
         
     for session in pool:
@@ -148,7 +143,7 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
         year_start = edit_start[:4]
         month_start = nums_to_months(edit_start[4:6])
         day_start = edit_start[6:]
-        edit_fin = session.disconnection_date
+        edit_fin = session.done_date
         year_fin = edit_fin[:4]
         month_fin = nums_to_months(edit_fin[4:6])
         day_fin = edit_fin[6:]
@@ -156,7 +151,7 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
         ses_list.append({'SessionIndex': aa, 'SessionID': session.session_id,
                     'EnergyProvider' : "energy provider", 
                     'StartedOn': year_start+" "+month_start+" "+day_start+" "+session.connection_time,
-                    'FinishedOn': year_fin+" "+month_fin+" "+day_fin+" "+session.disconnection_time,
+                    'FinishedOn': year_fin+" "+month_fin+" "+day_fin+" "+session.done_time,
                     'EnergyDelivered': session.kWh_delivered, 'PricePolicyRef': "Standard Pricing based on KWh delivered",
                     'CostPerKWh': costPerKWh ,'SessionCost': costPerKWh*session.kWh_delivered})
             
@@ -170,4 +165,3 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
                     'NumberOfVehicleChargingSessions' : len(ses_list),
                     'VehicleChargingSessionsList': ses_list})                        
 
->>>>>>> dff3f493bdabf268de6dd0bbcb8f2f352953952d

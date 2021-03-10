@@ -38,9 +38,11 @@ def home():
                 rate = random.uniform(40.0, 60.0)
 
             connection_time = datetime.now().strftime("%H%M%S")
-            disconnection_time = (datetime.now() + timedelta(seconds=int(float(kWh_Requested)*3600/rate))).strftime("%H%M%S")
+            connection_date = datetime.now().strftime("%Y%m%d")
+            done_time = (datetime.now() + timedelta(seconds=int(float(kWh_Requested)*3600/rate))).strftime("%H%M%S")
+            done_date = (datetime.now() + timedelta(seconds=int(float(kWh_Requested)*3600/rate))).strftime("%Y%m%d")
             
-            new_charging_session = Session(session_id=str(uuid.uuid4()), connection_date=date.today(), connection_time=connection_time, disconnection_time=disconnection_time, kWh_delivered=float(kWh_Requested), protocol=protocol, payment=payment, point_id=point.id, ev_id=car.id)
+            new_charging_session = Session(session_id=str(uuid.uuid4()), connection_date=connection_date, connection_time=connection_time, done_date=done_date, done_time=done_time, disconnection_date="????????", disconnection_time="??????", kWh_delivered=float(kWh_Requested), protocol=protocol, payment=payment, point_id=point.id, ev_id=car.id)
             db.session.add(new_charging_session)
             db.session.commit()
             flash('Wait for charging process!', category='success')
@@ -54,10 +56,12 @@ def home():
 def charging(sessionID):
     if request.method == 'POST':
         current_session = Session.query.filter_by(session_id=sessionID).first()
-        current_session.disconnection_date = date.today()
-        if current_session.disconnection_time > datetime.now().strftime("%H%M%S"):
-            current_session.kWh_delivered = current_session.kWh_delivered*(int(datetime.now().strftime("%H%M%S"))-int(current_session.connection_time))/(int(current_session.disconnection_time)-int(current_session.connection_time))
-            current_session.disconnection_time = datetime.now().strftime("%H%M%S")
+        current_session.disconnection_date = (datetime.now()).strftime("%Y%m%d")
+        current_session.disconnection_time = (datetime.now()).strftime("%H%M%S")
+        if current_session.disconnection_time < current_session.done_time and current_session.disconnection_date <= current_session.done_date:
+            current_session.kWh_delivered = current_session.kWh_delivered*(int(datetime.now().strftime("%H%M%S"))-int(current_session.connection_time))/(int(current_session.done_time)-int(current_session.connection_time))
+            current_session.done_time = datetime.now().strftime("%H%M%S")
+            current_session.done_date = current_session.disconnection_date
         db.session.commit()
         flash('Charging stopped!', category='success')
         return redirect(url_for('views.home'))

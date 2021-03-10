@@ -51,6 +51,7 @@ class Station(db.Model):
     longitude = db.Column(db.String(25))
     points = db.relationship('Point')
     operator_id = db.Column(db.Integer, db.ForeignKey('operator.id'))
+    provider_id = db.Column(db.Integer, db.ForeignKey('energyprovider.id'))
 
 class Point(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -58,8 +59,11 @@ class Point(db.Model):
     station_id = db.Column(db.Integer, db.ForeignKey('station.id'))
     sessions = db.relationship('Session')
 
-class EnergyProvider(db.Model):
+class Energyprovider(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    provider_id = db.Column(db.String(20), unique=True)
+    name = db.Column(db.String(100), unique=True)
+    stations = db.relationship('Station')
 
 
 class Session(db.Model):
@@ -67,6 +71,8 @@ class Session(db.Model):
     session_id = db.Column(db.String(100))
     connection_date = db.Column(db.String(60))
     connection_time = db.Column(db.String(60))
+    done_date = db.Column(db.String(60))
+    done_time = db.Column(db.String(60))
     disconnection_date = db.Column(db.String(60))
     disconnection_time = db.Column(db.String(60))
     kWh_delivered = db.Column(db.Float)

@@ -6,9 +6,11 @@
   <li class="list-group-item">
     EV: {{ user.evs[0].brand + " " + user.evs[0].model  }} 
     <br />
-    connection_start: {{ charging_session.connection_date + " " + charging_session.connection_time }}
+    connection: {{ charging_session.connection_date[:4] + "/" + charging_session.connection_date[4:6] + "/" + charging_session.connection_date[6:] + "  " + charging_session.connection_time[:2] + ":" + charging_session.connection_time[2:4] + ":" + charging_session.connection_time[4:]}}
     <br />
-    connection_finish: {{ charging_session.disconnection_date + " " + charging_session.disconnection_time }}
+    charging_finish: {{ charging_session.done_date[:4] + "/" + charging_session.done_date[4:6] + "/" + charging_session.done_date[6:] + "  " + charging_session.done_time[:2] + ":" + charging_session.done_time[2:4] + ":" + charging_session.done_time[4:]}}
+    <br />
+    disconnection: {{ charging_session.disconnection_date[:4] + "/" + charging_session.disconnection_date[4:6] + "/" + charging_session.disconnection_date[6:] + "  " + charging_session.disconnection_time[:2] + ":" + charging_session.disconnection_time[2:4] + ":" + charging_session.disconnection_time[4:]}}
     <br />
     kWh_delivered: {{ charging_session.kWh_delivered }}
     <br />
