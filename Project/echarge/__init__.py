@@ -5,7 +5,7 @@ from flask import Flask, jsonify
 
 from flask_sqlalchemy import SQLAlchemy
 from os import path
-
+from flask_login import LoginManager
 import uuid
 from werkzeug.security import generate_password_hash
 import pandas as pd
@@ -19,7 +19,7 @@ DB_NAME = "Data.db"
 
 
 def create_app():
-    App = Flask(__name__, template_folder='./frontend/templates')
+    App = Flask(__name__, static_folder='./frontend/static', template_folder='./frontend/templates')
     App.config['SECRET_KEY'] = 'hjshjhdjh'
     App.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     App.config['JSON_SORT_KEYS'] = False
@@ -36,6 +36,14 @@ def create_app():
 
     create_database(App)
     migrate.init_app(App, db)
+
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.Login'
+    login_manager.init_app(App)
+
+    @login_manager.user_loader
+    def load_user(id):
+        return User.query.get(int(id))
 
     return App
 
@@ -262,5 +270,9 @@ def initializer():
     default_points_stations('echarge/backend/static/points.csv')
     default_users()
     default_evs('echarge/backend/static/electric_vehicles_data.json')
+<<<<<<< HEAD
     default_sessions('echarge/backend/static/caltech_acndata_sessions_12month.json')
+=======
+    #default_sessions('echarge/backend/static/caltech_acndata_sessions_12month.json')
+>>>>>>> dff3f493bdabf268de6dd0bbcb8f2f352953952d
 

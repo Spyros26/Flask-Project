@@ -111,6 +111,63 @@ def ses_per_station(current_user, stationID, date_from, date_to):
                     'PeriodFrom': date_from[:4]+" "+nums_to_months(date_from[4:6])+" "+date_from[6:],
                     'PeriodTo': date_to[:4]+" "+nums_to_months(date_to[4:6])+" "+date_to[6:],
                     'TotalEnergyDelivered' : total_kWh_station,
+<<<<<<< HEAD
                     'NumberofChargingSessions' : total_sessions,
                     'NumberofActivePoints' : len(points_list),
                     'SessionsSummaryList': points_list})                        
+=======
+                    'NumberOfChargingSessions' : total_sessions,
+                    'NumberOfActivePoints' : len(points_list),
+                    'SessionsSummaryList': points_list})            
+
+
+@sessions.route('/SessionsPerEV/<vehicleID>/<date_from>/<date_to>', methods=['GET'])
+@token_required
+def ses_per_ev(current_user, vehicleID, date_from, date_to):
+    if current_user.role == "User":
+        return jsonify({'message' : 'Not allowed to perform this action!'})
+
+    ses_list = []
+    
+    ev = Evehicle.query.filter_by(car_id=vehicleID).first()
+    
+    total_kWh = 0
+    costPerKWh = 0.15
+    aa = 1
+    visited_points = []
+
+    pool = Session.query.filter((Session.ev_id==ev.id) & (Session.connection_date>=date_from) & (Session.disconnection_date<=date_to)).all()
+    pool.sort(key=sort_criteria)
+        
+    for session in pool:
+        total_kWh = total_kWh + session.kWh_delivered
+        if session.point_id not in visited_points:
+            visited_points.append(session.point_id)
+
+        edit_start = session.connection_date
+        year_start = edit_start[:4]
+        month_start = nums_to_months(edit_start[4:6])
+        day_start = edit_start[6:]
+        edit_fin = session.disconnection_date
+        year_fin = edit_fin[:4]
+        month_fin = nums_to_months(edit_fin[4:6])
+        day_fin = edit_fin[6:]
+            
+        ses_list.append({'SessionIndex': aa, 'SessionID': session.session_id,
+                    'EnergyProvider' : "energy provider", 
+                    'StartedOn': year_start+" "+month_start+" "+day_start+" "+session.connection_time,
+                    'FinishedOn': year_fin+" "+month_fin+" "+day_fin+" "+session.disconnection_time,
+                    'EnergyDelivered': session.kWh_delivered, 'PricePolicyRef': "Standard Pricing based on KWh delivered",
+                    'CostPerKWh': costPerKWh ,'SessionCost': costPerKWh*session.kWh_delivered})
+            
+        aa = aa + 1
+
+    return jsonify({'VehicleID': vehicleID, 'RequestTimestamp': datetime.datetime.now(),
+                    'PeriodFrom': date_from[:4]+" "+nums_to_months(date_from[4:6])+" "+date_from[6:],
+                    'PeriodTo': date_to[:4]+" "+nums_to_months(date_to[4:6])+" "+date_to[6:],
+                    'TotalEnergyConsumed' : total_kWh,
+                    'NumberOfVisitedPoints' : len(visited_points),
+                    'NumberOfVehicleChargingSessions' : len(ses_list),
+                    'VehicleChargingSessionsList': ses_list})                        
+
+>>>>>>> dff3f493bdabf268de6dd0bbcb8f2f352953952d
