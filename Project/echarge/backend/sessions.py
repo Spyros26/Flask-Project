@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from .auth import token_required
-from ..models import Session, Point, Evehicle, Station, Operator
+from ..models import Session, Point, Evehicle, Station, Operator, Energyprovider
 import json, datetime
 
 
@@ -165,3 +165,33 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
                     'NumberOfVehicleChargingSessions' : len(ses_list),
                     'VehicleChargingSessionsList': ses_list})                        
 
+
+@sessions.route('/SessionsPerProvider/<providerID>/<date_from>/<date_to>', methods=['GET'])
+@token_required
+def ses_per_provider(current_user, providerID, date_from, date_to):
+    if current_user.role == "User":
+        return jsonify({'message' : 'Not allowed to perform this action!'})
+
+    sess_list = []
+    costPerKWh = 0.15
+    poolall = []
+
+    provider = Energyprovider.query.filter_by(provider_id=providerID).first()
+
+    for station in provider.stations:
+        for point in station.points:
+            pool = Session.query.filter((Session.point_id==point.id) & (Session.connection_date>=date_from) & (Session.done_date<=date_to)).all()
+            poolall = poolall + pool
+    
+    poolall.sort(key=sort_criteria)
+    for sample in poolall:
+        point = Point.query.filter_by(id=sample.point_id).first()
+        station = Station.query.filter_by(id=point.station_id).first()
+        ev = Evehicle.query.filter_by(id=sample.ev_id).first()
+        sess_list.append({'ProviderID': providerID, 'ProviderName': provider.name, 'StationID': station.station_id,
+                            'SessionID': sample.session_id, 'VehicleID': ev.car_id, 'StartedOn': date_from,
+                            'FinishedOn': date_to, 'EnergyDelivered': sample.kWh_delivered, 
+                            'PricePolicyRef': "Standard Pricing based on KWh delivered", 'CostPerKWh': costPerKWh,
+                            'TotalCost': costPerKWh*sample.kWh_delivered})
+
+    return jsonify(sess_list)                            
