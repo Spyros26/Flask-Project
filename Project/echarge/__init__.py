@@ -254,7 +254,7 @@ def default_sessions(filename):
             db.session.add(new_session)
             #print(new_session.connection_date)
             db.session.commit()
-    print('Sessions are in')
+    print('First 500 Sessions are in')
 
 def months_to_nums(x):
     

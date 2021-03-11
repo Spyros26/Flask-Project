@@ -99,7 +99,7 @@ def sessions_update(current_user):
                     "Website_Payment", "QR_Code", "Cash"]
 
     #for x in range(0,length):
-    for x in range(0,500):
+    for x in range(500,1000):
         check = Session.query.filter_by(session_id=cont["_id"][x]).first()
         if not check:
             edit_start = cont["connectionTime"][x]

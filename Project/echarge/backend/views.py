@@ -42,7 +42,7 @@ def home():
             done_time = (datetime.now() + timedelta(seconds=int(float(kWh_Requested)*3600/rate))).strftime("%H%M%S")
             done_date = (datetime.now() + timedelta(seconds=int(float(kWh_Requested)*3600/rate))).strftime("%Y%m%d")
             
-            new_charging_session = Session(session_id=str(uuid.uuid4()), connection_date=connection_date, connection_time=connection_time, done_date=done_date, done_time=done_time, disconnection_date="????????", disconnection_time="??????", kWh_delivered=float(kWh_Requested), protocol=protocol, payment=payment, point_id=point.id, ev_id=car.id)
+            new_charging_session = Session(session_id=str(uuid.uuid4()), connection_date=connection_date, connection_time=connection_time, done_date=done_date, done_time=done_time, disconnection_date="??????", disconnection_time="??????", kWh_delivered=float(kWh_Requested), protocol=protocol, payment=payment, point_id=point.id, ev_id=car.id)
             db.session.add(new_charging_session)
             db.session.commit()
             flash('Wait for charging process!', category='success')
