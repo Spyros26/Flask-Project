@@ -9,10 +9,11 @@ url4 = "http://127.0.0.1:5000/admin/resetsessions"
 url5 = "http://127.0.0.1:5000/admin/system/sessionsupd"
 
 class Context:
-    def __init__(self, username, password, source, apikey):
+    def __init__(self, username, password, source, role, apikey):
         self.username = username
         self.password = password
         self.source = source
+        self.role = role
         self.apikey = apikey
         
 
@@ -20,16 +21,17 @@ class Context:
 @click.option("--username")
 @click.option("--password")
 @click.option("--source")
+@click.option("--role")
 @click.option("--apikey")
 @click.pass_context
-def cli(ctx, username, password, source, apikey):
-    ctx.obj = Context(username, password, source, apikey)
+def cli(ctx, username, password, source, role, apikey):
+    ctx.obj = Context(username, password, source, role, apikey)
 
 
 @cli.command()
 @click.pass_context
 def usermod(ctx):
-    response = requests.post(url + ctx.obj.username + "/" + ctx.obj.password, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
+    response = requests.post(url + ctx.obj.username + "/" + ctx.obj.password + "/" + ctx.obj.role, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
     print(response.text)
     
 @cli.command()

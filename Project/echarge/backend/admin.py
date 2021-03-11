@@ -10,9 +10,9 @@ import random
 
 admin = Blueprint('admin', __name__)
 
-@admin.route('/admin/usermod/<username>/<password>', methods=['POST'])
+@admin.route('/admin/usermod/<username>/<password>/<role>', methods=['POST'])
 @token_required
-def usermod(current_user, username, password):
+def usermod(current_user, username, password, role):
     if current_user.role != "Admin":
         return jsonify({'message' : 'Not allowed to perform this action!'})
 
@@ -21,17 +21,17 @@ def usermod(current_user, username, password):
     hashed_password = generate_password_hash(password, method='sha256')
 
     if not user:
-        new_user = User(public_id=str(uuid.uuid4()), username=username, password=hashed_password, role="User")
+        new_user = User(public_id=str(uuid.uuid4()), username=username, password=hashed_password, role=role)
         db.session.add(new_user)
         db.session.commit()
 
-        return jsonify({'message' : 'New user successfully created!'})
+        return jsonify({'message' : 'New stakeholder successfully created!'})
 
     user.password = hashed_password
-    db.session.add(user)
+    user.role = role
     db.session.commit()
 
-    return jsonify({'message' : 'User password changed successfully!'})
+    return jsonify({'message' : 'Stakeholder\'s password/role updated successfully!'})
 
 
 @admin.route('/admin/users/<username>', methods=['GET'])
@@ -98,7 +98,6 @@ def sessions_update(current_user):
     payment_table = ["Credit_Card", "Debit_Card", "Smartphone_Wallet",
                     "Website_Payment", "QR_Code", "Cash"]
 
-    #for x in range(0,length):
     for x in range(500,1000):
         check = Session.query.filter_by(session_id=cont["_id"][x]).first()
         if not check:
