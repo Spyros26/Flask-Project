@@ -50,22 +50,16 @@ def ses_per_point(current_user, pointID, date_from, date_to):
     pool.sort(key=sort_criteria)
     for sample in pool:
         #if int(sample.connection_date)>=int(date_from) and int(sample.disconnection_date)<=int(date_to):
-
-        edit_start = sample.connection_date
-        year_start = edit_start[:4]
-        month_start = nums_to_months(edit_start[4:6])
-        day_start = edit_start[6:]
-        edit_fin = sample.done_date
-        year_fin = edit_fin[:4]
-        month_fin = nums_to_months(edit_fin[4:6])
-        day_fin = edit_fin[6:]
+   
+        started_on = sample.connection_date[:4] + "-" + sample.connection_date[4:6] + "-" + sample.connection_date[6:] + "  " + sample.connection_time[:2] + ":" + sample.connection_time[2:4] + ":" + sample.connection_time[4:]
+        done_on = sample.done_date[:4] + "-" + sample.done_date[4:6] + "-" + sample.done_date[6:] + "  " + sample.done_time[:2] + ":" + sample.done_time[2:4] + ":" + sample.done_time[4:]
 
         ev = Evehicle.query.get(sample.ev_id)
 
 
         ses_list.append({'SessionIndex': aa, 'SessionID': sample.session_id, 
-                        'StartedOn': year_start+" "+month_start+" "+day_start+" "+sample.connection_time,
-                        'FinishedOn': year_fin+" "+month_fin+" "+day_fin+" "+sample.done_time,
+                        'StartedOn': started_on,
+                        'FinishedOn': done_on,
                         'EnergyDelivered': sample.kWh_delivered, 'Protocol': sample.protocol,
                         'Payment': sample.payment ,'VehicleType': ev.car_type})
         aa = aa + 1
@@ -134,38 +128,32 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
     pool = Session.query.filter((Session.ev_id==ev.id) & (Session.connection_date>=date_from) & (Session.done_date<=date_to)).all()
     pool.sort(key=sort_criteria)
         
-    for session in pool:
-        point = Point.query.get(session.point_id)
+    for sample in pool:
+        point = Point.query.get(sample.point_id)
         station = Station.query.get(point.station_id)
         provider = Energyprovider.query.get(station.provider_id)
 
-        total_kWh = total_kWh + session.kWh_delivered
-        if session.point_id not in visited_points:
-            visited_points.append(session.point_id)
+        total_kWh = total_kWh + sample.kWh_delivered
+        if sample.point_id not in visited_points:
+            visited_points.append(sample.point_id)
+    
+        started_on = sample.connection_date[:4] + "-" + sample.connection_date[4:6] + "-" + sample.connection_date[6:] + "  " + sample.connection_time[:2] + ":" + sample.connection_time[2:4] + ":" + sample.connection_time[4:]
+        done_on = sample.done_date[:4] + "-" + sample.done_date[4:6] + "-" + sample.done_date[6:] + "  " + sample.done_time[:2] + ":" + sample.done_time[2:4] + ":" + sample.done_time[4:]
 
-        edit_start = session.connection_date
-        year_start = edit_start[:4]
-        month_start = nums_to_months(edit_start[4:6])
-        day_start = edit_start[6:]
-        edit_fin = session.done_date
-        year_fin = edit_fin[:4]
-        month_fin = nums_to_months(edit_fin[4:6])
-        day_fin = edit_fin[6:]
-
-        if session.protocol == "Level 1: Low":
+        if sample.protocol == "Level 1: Low":
                 cost_rate = 1
-        elif session.protocol == "Level 2: Medium":
+        elif sample.protocol == "Level 2: Medium":
                 cost_rate = 2
-        elif session.protocol == "Level 3: High":
+        elif sample.protocol == "Level 3: High":
                 cost_rate = 3
 
-        ses_list.append({'SessionIndex': aa, 'SessionID': session.session_id,
+        ses_list.append({'SessionIndex': aa, 'SessionID': sample.session_id,
                     'EnergyProvider' : provider.name, 
-                    'StartedOn': year_start+" "+month_start+" "+day_start+" "+session.connection_time,
-                    'FinishedOn': year_fin+" "+month_fin+" "+day_fin+" "+session.done_time,
-                    'EnergyDelivered': session.kWh_delivered, 'PricePolicyRef': "Standard Pricing based on KWh delivered and Session Protocol. " + 
+                    'StartedOn': started_on,
+                    'FinishedOn': done_on,
+                    'EnergyDelivered': sample.kWh_delivered, 'PricePolicyRef': "Standard Pricing based on KWh delivered and Session Protocol. " + 
                     "e.g: Session cost = cost_rate*kWh_delivered*costPerKWh " + "where cost_rate = 1 (Session Protocol = Level 1: Low) / cost_rate = 2 (Session Protocol = Level 2: Medium) / cost_rate = 3 (Session Protocol = Level 3: High)",
-                    'CostPerKWh': costPerKWh ,'SessionCost': cost_rate*costPerKWh*session.kWh_delivered})
+                    'CostPerKWh': costPerKWh ,'SessionCost': cost_rate*costPerKWh*sample.kWh_delivered})
             
         aa = aa + 1
 
@@ -200,10 +188,22 @@ def ses_per_provider(current_user, providerID, date_from, date_to):
         point = Point.query.filter_by(id=sample.point_id).first()
         station = Station.query.filter_by(id=point.station_id).first()
         ev = Evehicle.query.filter_by(id=sample.ev_id).first()
-        sess_list.append({'ProviderID': providerID, 'ProviderName': provider.name, 'StationID': station.station_id,
-                            'SessionID': sample.session_id, 'VehicleID': ev.car_id, 'StartedOn': date_from,
-                            'FinishedOn': date_to, 'EnergyDelivered': sample.kWh_delivered, 
-                            'PricePolicyRef': "Standard Pricing based on KWh delivered", 'CostPerKWh': costPerKWh,
-                            'TotalCost': costPerKWh*sample.kWh_delivered})
 
-    return jsonify(sess_list)                            
+        if sample.protocol == "Level 1: Low":
+                cost_rate = 1
+        elif sample.protocol == "Level 2: Medium":
+                cost_rate = 2
+        elif sample.protocol == "Level 3: High":
+                cost_rate = 3
+
+        started_on = sample.connection_date[:4] + "-" + sample.connection_date[4:6] + "-" + sample.connection_date[6:] + "  " + sample.connection_time[:2] + ":" + sample.connection_time[2:4] + ":" + sample.connection_time[4:]
+        done_on = sample.done_date[:4] + "-" + sample.done_date[4:6] + "-" + sample.done_date[6:] + "  " + sample.done_time[:2] + ":" + sample.done_time[2:4] + ":" + sample.done_time[4:]
+        sess_list.append({  'StationID': station.station_id,
+                            'SessionID': sample.session_id, 'VehicleID': ev.car_id, 'StartedOn': started_on,
+                            'FinishedOn': done_on, 'EnergyDelivered': sample.kWh_delivered, 
+                            'PricePolicyRef': "Standard Pricing based on KWh delivered and Session Protocol. " + 
+                            "e.g: Session cost = cost_rate*kWh_delivered*costPerKWh " + "where cost_rate = 1 (Session Protocol = Level 1: Low) / cost_rate = 2 (Session Protocol = Level 2: Medium) / cost_rate = 3 (Session Protocol = Level 3: High)",
+                            'CostPerKWh': costPerKWh,
+                            'TotalCost': cost_rate*costPerKWh*sample.kWh_delivered})
+
+    return jsonify({'ProviderID': providerID, 'ProviderName': provider.name, 'ProviderChargingSessionsList': sess_list})                            

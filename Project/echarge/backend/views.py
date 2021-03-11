@@ -4,6 +4,7 @@ from ..models import Session, User, Evehicle, Point
 from .. import db
 import json, uuid, random
 from datetime import datetime, date, timedelta
+from .sessions import sort_criteria
 
 views = Blueprint('views', __name__)
 
@@ -75,8 +76,12 @@ def view_sessions():
     if request.method == 'POST':
         flash('The statement has been successfully issued!', category='success')
         return redirect(url_for('views.home'))
-
-    return render_template("view_sessions.html", user=current_user)
+    
+    sessions = []
+    for i in range(len(current_user.evs)):
+        sessions = sessions + current_user.evs[i].sessions
+    sessions.sort(key=sort_criteria)      
+    return render_template("view_sessions.html", user=current_user, sessions=sessions)
 
 
 @views.route('/delete-session', methods=['POST'])

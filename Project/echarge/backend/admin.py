@@ -106,25 +106,25 @@ def sessions_update(current_user):
             year_start = edit_start[12:16]
             month_start = months_to_nums(edit_start[8:11])
             day_start = edit_start[5:7]
-            time_start = edit_start[17:]
+            time_start = edit_start[17:19]+edit_start[20:22]+edit_start[23:25]
 
             edit_fin = cont["doneChargingTime"][x]
             year_fin = edit_fin[12:16]
             month_fin = months_to_nums(edit_fin[8:11])
             day_fin = edit_fin[5:7]
-            time_fin = edit_fin[17:]
+            time_fin = edit_fin[17:19]+edit_fin[20:22]+edit_fin[23:25]
             
             edit_dis = cont["disconnectTime"][x]
             year_dis = edit_dis[12:16]
             month_dis = months_to_nums(edit_dis[8:11])
             day_dis = edit_dis[5:7]
-            time_dis = edit_dis[17:]
+            time_dis = edit_dis[17:19]+edit_dis[20:22]+edit_dis[23:25]
 
-            begin = int(time_start[:2])*60+int(time_start[3:5])
+            begin = int(time_start[:2])*60+int(time_start[2:4])
             end = 0
             if day_start!=day_fin:
                 end = 1440
-            end = end + int(time_fin[:2])*60+int(time_fin[3:5])
+            end = end + int(time_fin[:2])*60+int(time_fin[2:4])
             space = end - begin
             if space==0:
                 space = 1

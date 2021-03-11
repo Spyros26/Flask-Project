@@ -2,21 +2,33 @@
 %}
 <h1 align="center">Your Charging Sessions</h1>
 <ul class="list-group list-group-flush" id="charging_sessions">
-  {% for charging_session in user.evs[0].sessions %}
+  {% for charging_session in sessions %}
   <li class="list-group-item">
     EV: {{ user.evs[0].brand + " " + user.evs[0].model  }} 
     <br />
-    connection: {{ charging_session.connection_date[:4] + "/" + charging_session.connection_date[4:6] + "/" + charging_session.connection_date[6:] + "  " + charging_session.connection_time[:2] + ":" + charging_session.connection_time[2:4] + ":" + charging_session.connection_time[4:]}}
+    charging station address: {{ station_address(charging_session.point_id) }}
     <br />
-    charging_finish: {{ charging_session.done_date[:4] + "/" + charging_session.done_date[4:6] + "/" + charging_session.done_date[6:] + "  " + charging_session.done_time[:2] + ":" + charging_session.done_time[2:4] + ":" + charging_session.done_time[4:]}}
+    connection: {{ charging_session.connection_date[:4] + "-" + charging_session.connection_date[4:6] + "-" + charging_session.connection_date[6:] + "  " + charging_session.connection_time[:2] + ":" + charging_session.connection_time[2:4] + ":" + charging_session.connection_time[4:]}}
     <br />
-    disconnection: {{ charging_session.disconnection_date[:4] + "/" + charging_session.disconnection_date[4:6] + "/" + charging_session.disconnection_date[6:] + "  " + charging_session.disconnection_time[:2] + ":" + charging_session.disconnection_time[2:4] + ":" + charging_session.disconnection_time[4:]}}
+    charging_finish: {{ charging_session.done_date[:4] + "-" + charging_session.done_date[4:6] + "-" + charging_session.done_date[6:] + "  " + charging_session.done_time[:2] + ":" + charging_session.done_time[2:4] + ":" + charging_session.done_time[4:]}}
+    <br />
+    disconnection: {{ charging_session.disconnection_date[:4] + "-" + charging_session.disconnection_date[4:6] + "-" + charging_session.disconnection_date[6:] + "  " + charging_session.disconnection_time[:2] + ":" + charging_session.disconnection_time[2:4] + ":" + charging_session.disconnection_time[4:]}}
     <br />
     kWh_delivered: {{ charging_session.kWh_delivered }}
+    <br />
+    Energy Provider: {{ energy_provider(charging_session.point_id) }}
     <br />
     protocol: {{ charging_session.protocol }}
     <br />
     payment: {{ charging_session.payment }}
+    <br />
+    {% if charging_session.protocol == "Level 1: Low" %}
+      cost: {{ 1*0.15*charging_session.kWh_delivered }}
+    {% elif charging_session.protocol == "Level 2: Medium" %}
+      cost: {{ 2*0.15*charging_session.kWh_delivered }}
+    {% else %}
+      cost: {{ 3*0.15*charging_session.kWh_delivered }}
+    {% endif %}
     <button type="button" class="close" onClick="deleteSession({{ charging_session.id }})">
       <span aria-hidden="true">&times;</span>
     </button>

@@ -45,6 +45,9 @@ def create_app():
     def load_user(id):
         return User.query.get(int(id))
 
+    App.jinja_env.globals.update(energy_provider=energy_provider)
+    App.jinja_env.globals.update(station_address=station_address)
+
     return App
 
 
@@ -53,6 +56,20 @@ def create_database(app):
         db.create_all(app=app)
         print('Created Database!')
 
+def energy_provider(point_id):
+    from .models import Point, Station, Energyprovider
+    point = Point.query.get(point_id)
+    station = Station.query.get(point.station_id)
+    provider = Energyprovider.query.get(station.provider_id)
+    return provider.name
+
+def station_address(point_id):
+    from .models import Point, Station
+    point = Point.query.get(point_id)
+    station = Station.query.get(point.station_id)
+    return station.address
+
+    
 def default_admin(username, password):
 
     from .models import User
@@ -77,10 +94,8 @@ def default_evs(filename):
         evs = json.load(jsdata)
 
     cont = pd.DataFrame(evs['data'])    
-    #cont = pd.read_json(filename)
     length = cont.shape[0]
-    #print(cont)
-    #print(length)
+
     for x in range(0,length):
         check = Evehicle.query.filter_by(car_id=cont["id"][x]).first()
         if not check:
@@ -100,9 +115,6 @@ def default_operators(filename):
     from .models import Operator
 
     df = pd.read_csv(filename, sep=";")
-    #print(df)
-    length = df.shape[0]
-    #print(length)
 
     for a, x in df.iterrows():
         check = Operator.query.filter_by(operator_id=x["ID"]).first()
@@ -111,7 +123,8 @@ def default_operators(filename):
                         website=x["WebsiteURL"], email=x["ContactEmail"])            
             db.session.add(new_op)
             db.session.commit()
-    print('Default operators are in')        
+    print('Default operators are in') 
+
     
 def default_points_stations(filename):
 
@@ -120,9 +133,6 @@ def default_points_stations(filename):
     col_list = ["_id", "AddressInfo.ID", "AddressInfo.AddressLine1", "AddressInfo.Latitude", "AddressInfo.Longitude"]
 
     df = pd.read_csv(filename, sep=",", nrows=100, usecols=col_list)
-    #print(df)
-    length = df.shape[0]
-    #print(length)
 
     operator_table = Operator.query.all()
     provider_table = Energyprovider.query.all()
@@ -132,7 +142,6 @@ def default_points_stations(filename):
 
             check = Station.query.filter_by(address=x["AddressInfo.AddressLine1"]).first()
             if not check:
-                #print(x["AddressInfo.AddressLine1"])
                 operator = random.choice(operator_table)
                 provider = random.choice(provider_table)
                 new_station = Station(station_id=str(x["AddressInfo.ID"]), address=x["AddressInfo.AddressLine1"], 
@@ -142,11 +151,9 @@ def default_points_stations(filename):
                 db.session.add(new_station)
                 db.session.commit()
             else:
-                #print(x["AddressInfo.AddressLine1"])
                 this_station = check    
             check2 = Point.query.filter_by(point_id=x["_id"]).first()
             if not check2:
-                #print(x['_id'])
                 new_point = Point(point_id=x["_id"], station_id=this_station.id)
                 db.session.add(new_point)
                 db.session.commit()
@@ -155,28 +162,29 @@ def default_points_stations(filename):
 
 
 def default_users():
-
     from .models import User
-
+    names = ["Liam", "Olivia", "Noah",	"Emma", "Oliver", "Ava", "William", "Sophia", "Elijah", "Isabella", "James", "Charlotte", "Benjamin", "Amelia", "Lucas", "Mia", "Mason", "Harper", "Ethan", "Evelyn"]
     for x in range(1,144):
         username = f"User{x}"
         password = f"password{x}"
+        name = names[x % 20]
         hashed_password = generate_password_hash(password, method='sha256')
         check = User.query.filter_by(username=username).first()
         if not check:
             new_user = User(public_id=str(uuid.uuid4()), username=username,
-                            password=hashed_password, role="User")
+                            password=hashed_password, name=name, role="User")
             db.session.add(new_user)
             db.session.commit()
 
     for x in range(1,21):
         username = f"Privileged{x}"
         password = f"privypass{x}"
+        name = "Privileged Stakeholder"
         hashed_password = generate_password_hash(password, method='sha256')
         check = User.query.filter_by(username=username).first()
         if not check:
             new_user = User(public_id=str(uuid.uuid4()), username=username,
-                            password=hashed_password, role="Privileged")
+                            password=hashed_password, name=name, role="Privileged")
             db.session.add(new_user)
             db.session.commit()                        
     print('Default users are in')
@@ -189,13 +197,6 @@ def default_sessions(filename):
         sess = json.load(jsdata)
 
     cont = pd.DataFrame(sess['_items'])    
-    #cont = pd.read_json(filename)
-    length = cont.shape[0]
-    #print(cont)
-    #print(length)
-    #table = User.query.limit(10).all()
-    #for x in range(0,10):
-        #print(random.choice(table))
 
     ev_table = Evehicle.query.all()
     point_table = Point.query.all()
@@ -203,11 +204,11 @@ def default_sessions(filename):
     payment_table = ["Credit_Card", "Debit_Card", "Smartphone_Wallet",
                     "Website_Payment", "QR_Code", "Cash"]
 
-    #for x in range(0,length):
     for x in range(0,500):
         check = Session.query.filter_by(session_id=cont["_id"][x]).first()
         if not check:
             edit_start = cont["connectionTime"][x]
+            
             year_start = edit_start[12:16]
             month_start = months_to_nums(edit_start[8:11])
             day_start = edit_start[5:7]
@@ -252,7 +253,6 @@ def default_sessions(filename):
                                 disconnection_time=time_dis, kWh_delivered = cont["kWhDelivered"][x],
                                 protocol=protocol ,payment=payment ,ev_id=ev.id, point_id=point.id)
             db.session.add(new_session)
-            #print(new_session.connection_date)
             db.session.commit()
     print('First 500 Sessions are in')
 

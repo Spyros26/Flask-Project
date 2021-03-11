@@ -1,6 +1,7 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
 %}
 <h1 align="center">Charge</h1>
+<h4 align="center">Hi {{ user.name }}! Please fill the form to charge your EV:</h4>
 <form method="POST">
   <div class="form-group">
     <label for="car_id">EV ID</label>

@@ -110,3 +110,35 @@ def Login():
 def Logout():
     logout_user()
     return redirect(url_for('auth.Login'))
+
+
+@auth.route('/sign-up', methods=['GET', 'POST'])
+def sign_up():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        name = request.form.get('Name')
+        password1 = request.form.get('password1')
+        password2 = request.form.get('password2')
+
+        user = User.query.filter_by(username=username).first()
+        if user:
+            flash('Username already exists.', category='error')
+        elif len(username) < 4:
+            flash('Username must be greater than 3 characters.', category='error')
+        elif len(name) < 2:
+            flash('Name must be greater than 1 character.', category='error')
+        elif password1 != password2:
+            flash('Passwords don\'t match.', category='error')
+        elif len(password1) < 4:
+            flash('Password must be at least 4 characters.', category='error')
+        else:
+            new_user = User(username=username, password=generate_password_hash(
+                password1, method='sha256'), name=name, role="User")
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user, remember=True)
+            flash('Account created!', category='success')
+            return redirect(url_for('views.home'))
+
+    return render_template("sign_up.html", user=current_user)
+    
