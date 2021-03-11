@@ -135,6 +135,10 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
     pool.sort(key=sort_criteria)
         
     for session in pool:
+        point = Point.query.get(session.point_id)
+        station = Station.query.get(point.station_id)
+        provider = Energyprovider.query.get(station.provider_id)
+
         total_kWh = total_kWh + session.kWh_delivered
         if session.point_id not in visited_points:
             visited_points.append(session.point_id)
@@ -147,13 +151,21 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
         year_fin = edit_fin[:4]
         month_fin = nums_to_months(edit_fin[4:6])
         day_fin = edit_fin[6:]
-            
+
+        if session.protocol == "Level 1: Low":
+                cost_rate = 1
+        elif session.protocol == "Level 2: Medium":
+                cost_rate = 2
+        elif session.protocol == "Level 3: High":
+                cost_rate = 3
+
         ses_list.append({'SessionIndex': aa, 'SessionID': session.session_id,
-                    'EnergyProvider' : "energy provider", 
+                    'EnergyProvider' : provider.name, 
                     'StartedOn': year_start+" "+month_start+" "+day_start+" "+session.connection_time,
                     'FinishedOn': year_fin+" "+month_fin+" "+day_fin+" "+session.done_time,
-                    'EnergyDelivered': session.kWh_delivered, 'PricePolicyRef': "Standard Pricing based on KWh delivered",
-                    'CostPerKWh': costPerKWh ,'SessionCost': costPerKWh*session.kWh_delivered})
+                    'EnergyDelivered': session.kWh_delivered, 'PricePolicyRef': "Standard Pricing based on KWh delivered and Session Protocol. " + 
+                    "e.g: Session cost = cost_rate*kWh_delivered*costPerKWh " + "where cost_rate = 1 (Session Protocol = Level 1: Low) / cost_rate = 2 (Session Protocol = Level 2: Medium) / cost_rate = 3 (Session Protocol = Level 3: High)",
+                    'CostPerKWh': costPerKWh ,'SessionCost': cost_rate*costPerKWh*session.kWh_delivered})
             
         aa = aa + 1
 
