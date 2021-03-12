@@ -247,7 +247,7 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
                         'FinishedOn': done_on,
                         'EnergyDelivered': sample.kWh_delivered, 'PricePolicyRef': "Standard Pricing based on KWh delivered and Session Protocol. " + 
                         "e.g: Session cost = cost_rate*kWh_delivered*costPerKWh " + "where cost_rate = 1 (Session Protocol = Level 1: Low) / cost_rate = 2 (Session Protocol = Level 2: Medium) / cost_rate = 3 (Session Protocol = Level 3: High)",
-                        'CostPerKWh': costPerKWh ,'SessionCost': cost_rate*costPerKWh*sample.kWh_delivered})
+                        'CostPerKWh': costPerKWh ,'SessionCost': round(cost_rate*costPerKWh*sample.kWh_delivered, 2)})
 
         else:
             indexl.append(aa)
@@ -260,7 +260,7 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
                         "e.g: Session cost = cost_rate*kWh_delivered*costPerKWh " + 
                         "where cost_rate = 1 (Session Protocol = Level 1: Low) / cost_rate = 2 (Session Protocol = Level 2: Medium) / cost_rate = 3 (Session Protocol = Level 3: High)")
             kwhcost.append(costPerKWh)
-            sesscostl.append(cost_rate*costPerKWh*sample.kWh_delivered)
+            sesscostl.append(round(cost_rate*costPerKWh*sample.kWh_delivered, 2))
 
         aa = aa + 1
 
@@ -283,7 +283,7 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
                         'SessionID': sessionl[x], 'EnergyProvider' : providerl[x], 
                         'StartedOn': startl[x], 'FinishedOn': finishl[x],
                         'EnergyDelivered': energyl[x], 'PricePolicyRef': pprl[x], 
-                        'CostPerKWh': kwhcost[x] ,'SessionCost': sesscostl[x]})
+                        'CostPerKWh': kwhcost[x] ,'SessionCost': round(sesscostl[x],2)})
 
         return fcsv.send_csv(objl, "reply.csv", ["VehicleID", "RequestTimestamp",
                                                 "PeriodFrom", "PeriodTo", "TotalEnergyConsumed",
@@ -291,6 +291,7 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
                                                 "SessionIndex", "SessionID", "EnergyProvider", 
                                                 "StartedOn", "FinishedOn", "EnergyDelivered", 
                                                 "PricePolicyRef", "CostPerKWh", "SessionCost"], delimiter=';')                
+
 
 @sessions.route('/SessionsPerProvider/<providerID>/<date_from>/<date_to>', methods=['GET'])
 @token_required
@@ -316,8 +317,6 @@ def ses_per_provider(current_user, providerID, date_from, date_to):
     pprl = []
     kwhcostl = []
     totalcostl = []
-
-
 
     provider = Energyprovider.query.filter_by(provider_id=providerID).first()
 
@@ -349,7 +348,7 @@ def ses_per_provider(current_user, providerID, date_from, date_to):
                                 'PricePolicyRef': "Standard Pricing based on KWh delivered and Session Protocol. " + 
                                 "e.g: Session cost = cost_rate*kWh_delivered*costPerKWh " + "where cost_rate = 1 (Session Protocol = Level 1: Low) / cost_rate = 2 (Session Protocol = Level 2: Medium) / cost_rate = 3 (Session Protocol = Level 3: High)",
                                 'CostPerKWh': costPerKWh,
-                                'TotalCost': cost_rate*costPerKWh*sample.kWh_delivered})
+                                'TotalCost': round(cost_rate*costPerKWh*sample.kWh_delivered, 2)})
 
         else:
             stationidl.append(station.station_id)
@@ -362,7 +361,7 @@ def ses_per_provider(current_user, providerID, date_from, date_to):
                         "e.g: Session cost = cost_rate*kWh_delivered*costPerKWh " + 
                         "where cost_rate = 1 (Session Protocol = Level 1: Low) / cost_rate = 2 (Session Protocol = Level 2: Medium) / cost_rate = 3 (Session Protocol = Level 3: High)")
             kwhcostl.append(costPerKWh)
-            totalcostl.append(cost_rate*costPerKWh*sample.kWh_delivered)
+            totalcostl.append(round(cost_rate*costPerKWh*sample.kWh_delivered, 2))
 
     if askformat=='json':
         return jsonify({'ProviderID': providerID, 'ProviderName': provider.name, 'ProviderChargingSessionsList': sess_list})                            
@@ -374,7 +373,7 @@ def ses_per_provider(current_user, providerID, date_from, date_to):
                         'SessionID': sessionidl[x], 'VehicleID': vehicleidl[x], 'StartedOn': startl[x],
                         'FinishedOn': finishl[x], 'EnergyDelivered': energyl[x], 
                         'PricePolicyRef': pprl[x], 'CostPerKWh': kwhcostl[x],
-                        'TotalCost': totalcostl[x]})
+                        'TotalCost': round(totalcostl[x], 2)})
 
         return fcsv.send_csv(objl, "reply.csv", ["ProviderID", "ProviderName", "StationID",
                                                 "SessionID", "VehicleID", "StartedOn",

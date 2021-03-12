@@ -48,6 +48,7 @@ def create_app():
 
     App.jinja_env.globals.update(energy_provider=energy_provider)
     App.jinja_env.globals.update(station_address=station_address)
+    App.jinja_env.globals.update(round_cost=round_cost)
 
     return App
 
@@ -57,6 +58,9 @@ def create_database(app):
         db.create_all(app=app)
         print('Created Database!')
 
+def round_cost(x):
+    return round(x, 2)
+    
 def energy_provider(point_id):
     from .models import Point, Station, Energyprovider
     point = Point.query.get(point_id)
