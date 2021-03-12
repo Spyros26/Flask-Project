@@ -23,11 +23,11 @@
     payment: {{ charging_session.payment }}
     <br />
     {% if charging_session.protocol == "Level 1: Low" %}
-      cost: {{ 1*0.15*charging_session.kWh_delivered }}
+      cost: {{ round_cost(1*0.15*charging_session.kWh_delivered) }}
     {% elif charging_session.protocol == "Level 2: Medium" %}
-      cost: {{ 2*0.15*charging_session.kWh_delivered }}
+      cost: {{ round_cost(2*0.15*charging_session.kWh_delivered) }}
     {% else %}
-      cost: {{ 3*0.15*charging_session.kWh_delivered }}
+      cost: {{ round_cost(3*0.15*charging_session.kWh_delivered) }}
     {% endif %}
     <button type="button" class="close" onClick="deleteSession({{ charging_session.id }})">
       <span aria-hidden="true">&times;</span>
