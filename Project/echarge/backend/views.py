@@ -55,8 +55,8 @@ def home():
 @views.route('/charging/<sessionID>', methods=['GET', 'POST'])
 @login_required
 def charging(sessionID):
+    current_session = Session.query.filter_by(session_id=sessionID).first()
     if request.method == 'POST':
-        current_session = Session.query.filter_by(session_id=sessionID).first()
         current_session.disconnection_date = (datetime.now()).strftime("%Y%m%d")
         current_session.disconnection_time = (datetime.now()).strftime("%H%M%S")
         if current_session.disconnection_time < current_session.done_time and current_session.disconnection_date <= current_session.done_date:
@@ -67,7 +67,13 @@ def charging(sessionID):
         flash('Charging stopped!', category='success')
         return redirect(url_for('views.home'))
 
-    return render_template("charging.html", user=current_user)
+    FMT = '%H%M%S'
+    tdelta = datetime.strptime(current_session.done_time, FMT) - datetime.strptime(current_session.connection_time, FMT)
+    if tdelta.days < 0:
+        tdelta = timedelta(days=0, seconds=tdelta.seconds, microseconds=tdelta.microseconds)
+    duration = round(tdelta.total_seconds()/60, 2)
+
+    return render_template("charging.html", user=current_user, duration=duration)
 
 
 @views.route('/issue-statement', methods=['GET', 'POST'])

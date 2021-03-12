@@ -1,8 +1,11 @@
 {% extends "base.html" %} {% block title %}Charging...{% endblock %}
 {% block content %}
 <h1 align="center">Charging...</h1>
+</br>
+<h4 align="center" id="duration">Please wait. Total Charging duration in minutes is {{ duration }}</h4>
+</br>
 <div align="center">
-  <div class="progress-bar" style="--width: 0" data-label="Charging..."></div>
+  <div class="progress-bar"  style="--width: 0" data-label="Charging..."></div>
 </div>
 <form method="POST"> 
   <br />
