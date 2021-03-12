@@ -3,7 +3,7 @@ function deleteSession(sessionId) {
       method: "POST",
       body: JSON.stringify({ sessionId: sessionId }),
     }).then((_res) => {
-      window.location.href = "/issue-statement";
+      window.location.href = "/evcharge/api/issue-statement";
     });
   }
 
