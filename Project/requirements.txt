@@ -2,4 +2,5 @@ flask
 Flask-Migrate
 Flask-SQLAlchemy
 flask-login
+flask_csv
 PyJWT==1.6.4

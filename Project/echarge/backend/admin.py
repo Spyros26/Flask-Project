@@ -7,6 +7,7 @@ import json
 import pandas as pd
 from .auth import token_required
 import random
+import flask_csv as fcsv
 
 admin = Blueprint('admin', __name__)
 
@@ -40,13 +41,21 @@ def users(current_user, username):
     if current_user.role != "Admin":
         return jsonify({'message' : 'Not allowed to perform this action!'})
 
+    askformat = request.args.get('format', default='json', type=str)
+    if askformat!='json' and askformat!='csv':
+        return jsonify({'message' : 'Cannot accept format. Supported formats are json and csv.'})
+
     user = User.query.filter_by(username=username).first()
 
     if not user:
         return jsonify({'message' : 'The user was not found!'})
 
-    return jsonify({'username' : user.username, 'hashed_password' : user.password, 'role' : user.role})
+    if askformat=='json':
+        return jsonify({'username' : user.username, 'hashed_password' : user.password, 'role' : user.role})
 
+    else:
+        return fcsv.send_csv([{'username' : user.username, 'hashed_password' : user.password, 'role' : user.role}], 
+                                "reply.csv", ["username", "hashed_password", "role"], delimiter=';')
 
 @admin.route('/admin/healthcheck', methods=['GET'])
 @token_required
