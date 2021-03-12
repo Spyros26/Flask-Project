@@ -33,12 +33,12 @@
       <div class="collapse navbar-collapse" id="navbar">
         <div class="navbar-nav">
           {% if user.is_authenticated %}
-          <a class="nav-item nav-link" id="home" href="/">Home</a>
-          <a class="nav-item nav-link" id="view_sessions" href="/issue-statement">Issue Statement</a>
-          <a class="nav-item nav-link" id="logout" href="/Logout">Logout</a>
+          <a class="nav-item nav-link" id="home" href="/evcharge/api/">Home</a>
+          <a class="nav-item nav-link" id="view_sessions" href="/evcharge/api/issue-statement">Issue Statement</a>
+          <a class="nav-item nav-link" id="logout" href="/evcharge/api/Logout">Logout</a>
           {% else %}
-          <a class="nav-item nav-link" id="login" href="/Login">Login</a>
-          <a class="nav-item nav-link" id="signUp" href="/sign-up">Sign Up</a>
+          <a class="nav-item nav-link" id="login" href="/evcharge/api/Login">Login</a>
+          <a class="nav-item nav-link" id="signUp" href="/evcharge/api/sign-up">Sign Up</a>
           {% endif %}
         </div>
       </div>

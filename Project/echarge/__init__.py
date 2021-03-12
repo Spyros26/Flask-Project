@@ -23,14 +23,15 @@ def create_app():
     App.config['SECRET_KEY'] = 'hjshjhdjh'
     App.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     App.config['JSON_SORT_KEYS'] = False
+    App.config['SERVER_NAME'] = 'localhost:8765'
     db.init_app(App)
 
     from echarge.backend import views, auth, admin, sessions
 
-    App.register_blueprint(views, url_prefix='/')
-    App.register_blueprint(admin, url_prefix='/')
-    App.register_blueprint(auth, url_prefix='/')
-    App.register_blueprint(sessions, url_prefix='/')
+    App.register_blueprint(views, url_prefix='/evcharge/api/')
+    App.register_blueprint(admin, url_prefix='/evcharge/api/')
+    App.register_blueprint(auth, url_prefix='/evcharge/api/')
+    App.register_blueprint(sessions, url_prefix='/evcharge/api/')
 
     from .models import User, RevokedToken, Evehicle, Point, Station, Operator, Session
 
