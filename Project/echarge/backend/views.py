@@ -76,18 +76,37 @@ def charging(sessionID):
     return render_template("charging.html", user=current_user, duration=duration)
 
 
-@views.route('/issue-statement', methods=['GET', 'POST'])
+@views.route('/issue-statement/<datefrom>/<dateto>', methods=['GET', 'POST'])
 @login_required
-def view_sessions():
+def view_sessions(datefrom, dateto):
     if request.method == 'POST':
         flash('The statement has been successfully issued!', category='success')
         return redirect(url_for('views.home'))
     
     sessions = []
+    datefrom = datefrom[:4] + datefrom[5:7] + datefrom[8:]
+    dateto = dateto[:4] + dateto[5:7] + dateto[8:]
+
     for i in range(len(current_user.evs)):
-        sessions = sessions + current_user.evs[i].sessions
+        pool = Session.query.filter((Session.ev_id==current_user.evs[i].id) & (Session.connection_date>=datefrom) & (Session.done_date<=dateto)).all()
+        sessions = sessions + pool
     sessions.sort(key=sort_criteria)      
     return render_template("view_sessions.html", user=current_user, sessions=sessions)
+
+
+@views.route('/statement_filters', methods=['GET', 'POST'])
+@login_required
+def statement_filters():
+    if request.method == 'POST':
+        datefrom = request.form.get('datefrom')
+        dateto = request.form.get('dateto')
+        if not datefrom or not dateto:
+            flash('Select filters', category='error')
+        else:
+            flash('Statement filters have been applied!', category='success')
+        return redirect(url_for('views.view_sessions', datefrom=datefrom, dateto=dateto))
+         
+    return render_template("statement_filters.html", user=current_user)
 
 
 @views.route('/delete-session', methods=['POST'])
