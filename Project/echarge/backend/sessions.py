@@ -41,7 +41,7 @@ def ses_per_point(current_user, pointID, date_from, date_to):
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json and csv.'})
+        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
 
     ses_list = []
 
@@ -123,7 +123,7 @@ def ses_per_station(current_user, stationID, date_from, date_to):
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json and csv.'})
+        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
 
     points_list = []
     
@@ -195,7 +195,7 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json and csv.'})
+        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
 
     ses_list = []
     
@@ -301,7 +301,7 @@ def ses_per_provider(current_user, providerID, date_from, date_to):
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json and csv.'})
+        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
 
     sess_list = []
     costPerKWh = 0.15

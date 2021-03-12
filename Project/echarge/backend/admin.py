@@ -43,7 +43,7 @@ def users(current_user, username):
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json and csv.'})
+        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
 
     user = User.query.filter_by(username=username).first()
 
@@ -91,6 +91,9 @@ def sessions_update(current_user):
     if current_user.role != "Admin":
         return jsonify({'message' : 'Not allowed to perform this action!'})
 
+    askformat = request.args.get('format', default='json', type=str)
+    if askformat!='json' and askformat!='csv':
+        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
 
     filename = request.form.get('file')
     with open(filename) as jsdata:
@@ -160,6 +163,13 @@ def sessions_update(current_user):
             sessions_imported = sessions_imported + 1
     
     sessions_in_db = Session.query.count()
-    return jsonify({'SessionsInUploadedFile' : length,
-                    'SessionsImported' : sessions_imported,
-                    'TotalSessionsInDatabase' : sessions_in_db})
+
+    if askformat=='json':
+        return jsonify({'SessionsInUploadedFile' : length,
+                        'SessionsImported' : sessions_imported,
+                        'TotalSessionsInDatabase' : sessions_in_db})
+    else:
+        return fcsv.send_csv([{'SessionsInUploadedFile' : length,
+                        'SessionsImported' : sessions_imported,
+                        'TotalSessionsInDatabase' : sessions_in_db}], "reply.csv",
+                         ["SessionsInUploadedFile", "SessionsImported", "TotalSessionsInDatabase"], delimiter=';')
