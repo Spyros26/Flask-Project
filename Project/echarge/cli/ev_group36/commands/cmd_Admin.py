@@ -2,6 +2,7 @@ import click
 import requests
 
 
+
 url = "http://localhost:8765/evcharge/api/admin/usermod/"
 url2 = "http://localhost:8765/evcharge/api/admin/users/"
 url3 = "http://localhost:8765/evcharge/api/admin/healthcheck"
@@ -23,7 +24,7 @@ class Context:
 @click.option("--password")
 @click.option("--source")
 @click.option("--role")
-@click.option("--format")
+@click.option("--format", default="json", show_default=True)
 @click.option("--apikey")
 @click.pass_context
 def cli(ctx, username, password, source, role, format, apikey):
@@ -33,16 +34,22 @@ def cli(ctx, username, password, source, role, format, apikey):
 @cli.command()
 @click.pass_context
 def usermod(ctx):
-    response = requests.post(url + ctx.obj.username + "/" + ctx.obj.password + "/" + ctx.obj.role, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
-    print(response.text)
+    try:
+        response = requests.post(url + ctx.obj.username + "/" + ctx.obj.password + "/" + ctx.obj.role, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
+        print(response.text)
+    except:
+        print('Invalid parameters.')
+        print('Try ev_group36 Admin --help for help.')
     
 @cli.command()
 @click.pass_context
 def users(ctx):
-    if not ctx.obj.format:
-        ctx.obj.format = "json"
-    response = requests.get(url2 + ctx.obj.username + "?format=" + ctx.obj.format, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
-    print(response.text)
+    try:
+        response = requests.get(url2 + ctx.obj.username + "?format=" + ctx.obj.format, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
+        print(response.text)
+    except:
+        print('Invalid parameters.')
+        print('Try ev_group36 Admin --help for help.')
 
 @cli.command()
 @click.pass_context
@@ -59,7 +66,8 @@ def resetsessions(ctx):
 @cli.command()
 @click.pass_context
 def sessionsupd(ctx):
-    if not ctx.obj.format:
-        ctx.obj.format = "json"
-    response = requests.post(url5 + "?format=" + ctx.obj.format, data = {'file':ctx.obj.source}, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
-    print(response.text)
+    if not ctx.obj.source:
+        print('Source parameter is missing')
+    else:
+        response = requests.post(url5 + "?format=" + ctx.obj.format, data = {'file':ctx.obj.source}, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
+        print(response.text)

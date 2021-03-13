@@ -15,7 +15,7 @@ admin = Blueprint('admin', __name__)
 @token_required
 def usermod(current_user, username, password, role):
     if current_user.role != "Admin":
-        return jsonify({'message' : 'Not allowed to perform this action!'})
+        return make_response('Not allowed to perform this action!', 401)
 
     user = User.query.filter_by(username=username).first()
 
@@ -26,55 +26,55 @@ def usermod(current_user, username, password, role):
         db.session.add(new_user)
         db.session.commit()
 
-        return jsonify({'message' : 'New stakeholder successfully created!'})
-
+        return make_response('New stakeholder successfully created!')
+    
     user.password = hashed_password
     user.role = role
     db.session.commit()
 
-    return jsonify({'message' : 'Stakeholder\'s password/role updated successfully!'})
+    return make_response('Stakeholder\'s password/role updated successfully!')
 
 
 @admin.route('/admin/users/<username>', methods=['GET'])
 @token_required
 def users(current_user, username):
     if current_user.role != "Admin":
-        return jsonify({'message' : 'Not allowed to perform this action!'})
+        return make_response('Not allowed to perform this action!', 401)
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
+        return make_response('Cannot accept format. Supported formats are json (default) and csv.', 400)
 
     user = User.query.filter_by(username=username).first()
 
     if not user:
-        return jsonify({'message' : 'The user was not found!'})
+        return make_response('The user was not found!', 400)
 
     if askformat=='json':
-        return jsonify({'username' : user.username, 'hashed_password' : user.password, 'name' : user.name, 'role' : user.role})
+        return jsonify({'username' : user.username, 'hashed_password' : user.password, 'name' : user.name, 'email' : user.email, 'role' : user.role})
 
     else:
-        return fcsv.send_csv([{'username' : user.username, 'hashed_password' : user.password, 'name' : user.name, 'role' : user.role}], 
-                                "reply.csv", ["username", "hashed_password", "name", "role"], delimiter=';')
+        return fcsv.send_csv([{'username' : user.username, 'hashed_password' : user.password, 'name' : user.name, 'email' : user.email, 'role' : user.role}], 
+                                "reply.csv", ["username", "hashed_password", "name", "email", "role"], delimiter=';')
 
 @admin.route('/admin/healthcheck', methods=['GET'])
 @token_required
 def healthcheck(current_user):
     if current_user.role != "Admin":
-        return jsonify({'message' : 'Not allowed to perform this action!'})
+        return make_response('Not allowed to perform this action!', 401)
 
     try:
         cnt = User.query.count()
         return jsonify({'status' : 'OK'})
     except:
-        return jsonify({'status' : 'failed'})
+        return jsonify({'status' : 'failed'}), 400
 
 
 @admin.route('/admin/resetsessions', methods=['POST'])
 @token_required
 def resetsessions(current_user):
     if current_user.role != "Admin":
-        return jsonify({'message' : 'Not allowed to perform this action!'})
+        return make_response('Not allowed to perform this action!', 401)
 
     try:
         num_sessions_deleted = db.session.query(Session).delete()
@@ -82,18 +82,18 @@ def resetsessions(current_user):
         default_admin('admin','petrol4ever')
         return jsonify({'status' : 'OK'})
     except:
-        return jsonify({'status' : 'failed'})
+        return jsonify({'status' : 'failed'}), 400
 
 
 @admin.route('/admin/system/sessionsupd', methods=['POST'])
 @token_required
 def sessions_update(current_user):
     if current_user.role != "Admin":
-        return jsonify({'message' : 'Not allowed to perform this action!'})
+        return make_response('Not allowed to perform this action!', 401)
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
+        return make_response('Cannot accept format. Supported formats are json (default) and csv.', 400)
 
     filename = request.form.get('file')
     with open(filename) as jsdata:
@@ -158,7 +158,6 @@ def sessions_update(current_user):
                                 disconnection_time=time_dis, kWh_delivered = cont["kWhDelivered"][x],
                                 protocol=protocol ,payment=payment ,ev_id=ev.id, point_id=point.id)
             db.session.add(new_session)
-            #print(new_session.connection_date)
             db.session.commit()
             sessions_imported = sessions_imported + 1
     

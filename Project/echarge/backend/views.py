@@ -12,6 +12,7 @@ views = Blueprint('views', __name__)
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
+    status=200
     if request.method == 'POST':
         car_id = request.form.get('car_id')
         kWh_Requested = request.form.get('kWh_Requested')
@@ -24,12 +25,16 @@ def home():
 
         if car not in current_user.evs:
             flash('Car id is invalid!', category='error')
+            status=400
         elif protocol not in ["Level 1: Low", "Level 2: Medium", "Level 3: High"]:
             flash('Protocol is invalid!', category='error')
+            status=400
         elif payment not in ["Credit_Card", "Debit_Card", "Smartphone_Wallet", "Website_Payment", "QR_Code", "Cash"]:
             flash('Payment Method is invalid!', category='error')
+            status=400
         elif not point:
             flash('Point id is invalid!', category='error')
+            status=400
         else:
             if protocol == "Level 1: Low":
                 rate = random.uniform(2.0, 5.0)
@@ -49,7 +54,7 @@ def home():
             flash('Wait for charging process!', category='success')
             return redirect(url_for('views.charging', sessionID=new_charging_session.session_id))
     
-    return render_template("home.html", user=current_user)
+    return render_template("home.html", user=current_user), status
 
 
 @views.route('/charging/<sessionID>', methods=['GET', 'POST'])
@@ -97,16 +102,18 @@ def view_sessions(datefrom, dateto):
 @views.route('/statement_filters', methods=['GET', 'POST'])
 @login_required
 def statement_filters():
+    status=200
     if request.method == 'POST':
         datefrom = request.form.get('datefrom')
         dateto = request.form.get('dateto')
         if not datefrom or not dateto:
             flash('Select filters', category='error')
+            status=400
         else:
             flash('Statement filters have been applied!', category='success')
-        return redirect(url_for('views.view_sessions', datefrom=datefrom, dateto=dateto))
+            return redirect(url_for('views.view_sessions', datefrom=datefrom, dateto=dateto))
          
-    return render_template("statement_filters.html", user=current_user)
+    return render_template("statement_filters.html", user=current_user), status
 
 
 @views.route('/delete-session', methods=['POST'])

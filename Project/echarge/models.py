@@ -11,6 +11,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(40), unique=True)
     password = db.Column(db.String(60))
     name = db.Column(db.String(80))
+    email = db.Column(db.String(80), unique=True)
     role = db.Column(db.String(20))
     evs = db.relationship('Evehicle')
 

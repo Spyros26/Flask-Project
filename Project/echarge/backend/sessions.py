@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, make_response
 from .auth import token_required
 from ..models import Session, Point, Evehicle, Station, Operator, Energyprovider
 import json, datetime
@@ -37,11 +37,11 @@ def nums_to_months(x):
 @token_required
 def ses_per_point(current_user, pointID, date_from, date_to):
     if current_user.role == "User":
-        return jsonify({'message' : 'Not allowed to perform this action!'})
+        return make_response('Not allowed to perform this action!', 401)
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
+        return make_response('Cannot accept format. Supported formats are json (default) and csv.', 400)
 
     ses_list = []
 
@@ -67,8 +67,6 @@ def ses_per_point(current_user, pointID, date_from, date_to):
     pool = Session.query.filter((Session.point_id==point.id) & (Session.connection_date>=date_from) & (Session.done_date<=date_to)).all()
     pool.sort(key=sort_criteria)
     for sample in pool:
-        #if int(sample.connection_date)>=int(date_from) and int(sample.disconnection_date)<=int(date_to):
-   
         started_on = sample.connection_date[:4] + "-" + sample.connection_date[4:6] + "-" + sample.connection_date[6:] + "  " + sample.connection_time[:2] + ":" + sample.connection_time[2:4] + ":" + sample.connection_time[4:]
         done_on = sample.done_date[:4] + "-" + sample.done_date[4:6] + "-" + sample.done_date[6:] + "  " + sample.done_time[:2] + ":" + sample.done_time[2:4] + ":" + sample.done_time[4:]
 
@@ -119,11 +117,11 @@ def ses_per_point(current_user, pointID, date_from, date_to):
 @token_required
 def ses_per_station(current_user, stationID, date_from, date_to):
     if current_user.role == "User":
-        return jsonify({'message' : 'Not allowed to perform this action!'})
+        return make_response('Not allowed to perform this action!', 401)
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
+        return make_response('Cannot accept format. Supported formats are json (default) and csv.', 400)
 
     points_list = []
     
@@ -191,11 +189,11 @@ def ses_per_station(current_user, stationID, date_from, date_to):
 @token_required
 def ses_per_ev(current_user, vehicleID, date_from, date_to):
     if current_user.role == "User":
-        return jsonify({'message' : 'Not allowed to perform this action!'})
+        return make_response('Not allowed to perform this action!', 401)
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
+        return make_response('Cannot accept format. Supported formats are json (default) and csv.', 400)
 
     ses_list = []
     
@@ -297,11 +295,11 @@ def ses_per_ev(current_user, vehicleID, date_from, date_to):
 @token_required
 def ses_per_provider(current_user, providerID, date_from, date_to):
     if current_user.role == "User":
-        return jsonify({'message' : 'Not allowed to perform this action!'})
+        return make_response('Not allowed to perform this action!', 401)
 
     askformat = request.args.get('format', default='json', type=str)
     if askformat!='json' and askformat!='csv':
-        return jsonify({'message' : 'Cannot accept format. Supported formats are json (default) and csv.'})
+        return make_response('Cannot accept format. Supported formats are json (default) and csv.', 400)
 
     sess_list = []
     costPerKWh = 0.15

@@ -173,11 +173,12 @@ def default_users():
         username = f"User{x}"
         password = f"password{x}"
         name = names[x % 20]
+        email = f"User{x}@gmail.com"
         hashed_password = generate_password_hash(password, method='sha256')
         check = User.query.filter_by(username=username).first()
         if not check:
             new_user = User(public_id=str(uuid.uuid4()), username=username,
-                            password=hashed_password, name=name, role="User")
+                            password=hashed_password, name=name, email=email, role="User")
             db.session.add(new_user)
             db.session.commit()
 
@@ -185,11 +186,12 @@ def default_users():
         username = f"Privileged{x}"
         password = f"privypass{x}"
         name = "Privileged Stakeholder"
+        email = f"Privileged{x}@gmail.com"
         hashed_password = generate_password_hash(password, method='sha256')
         check = User.query.filter_by(username=username).first()
         if not check:
             new_user = User(public_id=str(uuid.uuid4()), username=username,
-                            password=hashed_password, name=name, role="Privileged")
+                            password=hashed_password, name=name, email=email, role="Privileged")
             db.session.add(new_user)
             db.session.commit()                        
     print('Default users are in')
