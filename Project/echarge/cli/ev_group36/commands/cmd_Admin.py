@@ -2,11 +2,11 @@ import click
 import requests
 
 
-url = "http://127.0.0.1:5000/admin/usermod/"
-url2 = "http://127.0.0.1:5000/admin/users/"
-url3 = "http://127.0.0.1:5000/admin/healthcheck"
-url4 = "http://127.0.0.1:5000/admin/resetsessions"
-url5 = "http://127.0.0.1:5000/admin/system/sessionsupd"
+url = "http://localhost:8765/evcharge/api/admin/usermod/"
+url2 = "http://localhost:8765/evcharge/api/admin/users/"
+url3 = "http://localhost:8765/evcharge/api/admin/healthcheck"
+url4 = "http://localhost:8765/evcharge/api/admin/resetsessions"
+url5 = "http://localhost:8765/evcharge/api/admin/system/sessionsupd"
 
 class Context:
     def __init__(self, username, password, source, role, format, apikey):
@@ -39,6 +39,8 @@ def usermod(ctx):
 @cli.command()
 @click.pass_context
 def users(ctx):
+    if not ctx.obj.format:
+        ctx.obj.format = "json"
     response = requests.get(url2 + ctx.obj.username + "?format=" + ctx.obj.format, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
     print(response.text)
 
@@ -57,5 +59,7 @@ def resetsessions(ctx):
 @cli.command()
 @click.pass_context
 def sessionsupd(ctx):
-    response = requests.post(url5, data = {'file':ctx.obj.source}, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
+    if not ctx.obj.format:
+        ctx.obj.format = "json"
+    response = requests.post(url5 + "?format=" + ctx.obj.format, data = {'file':ctx.obj.source}, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
     print(response.text)

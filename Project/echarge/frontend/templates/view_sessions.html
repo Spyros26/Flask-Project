@@ -1,6 +1,8 @@
 {% extends "base.html" %} {% block title %}Issue Statement{% endblock %} {% block content
 %}
 <h1 align="center">Your Charging Sessions</h1>
+<h4 align="center" id="dates">From {{ datefrom }} To {{ dateto }}</h4>
+</br>
 <ul class="list-group list-group-flush" id="charging_sessions">
   {% for charging_session in sessions %}
   <li class="list-group-item">
