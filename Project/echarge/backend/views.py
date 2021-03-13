@@ -84,14 +84,14 @@ def view_sessions(datefrom, dateto):
         return redirect(url_for('views.home'))
     
     sessions = []
-    datefrom = datefrom[:4] + datefrom[5:7] + datefrom[8:]
-    dateto = dateto[:4] + dateto[5:7] + dateto[8:]
+    date_from = datefrom[:4] + datefrom[5:7] + datefrom[8:]
+    date_to = dateto[:4] + dateto[5:7] + dateto[8:]
 
     for i in range(len(current_user.evs)):
-        pool = Session.query.filter((Session.ev_id==current_user.evs[i].id) & (Session.connection_date>=datefrom) & (Session.done_date<=dateto)).all()
+        pool = Session.query.filter((Session.ev_id==current_user.evs[i].id) & (Session.connection_date>=date_from) & (Session.done_date<=date_to)).all()
         sessions = sessions + pool
     sessions.sort(key=sort_criteria)      
-    return render_template("view_sessions.html", user=current_user, sessions=sessions)
+    return render_template("view_sessions.html", user=current_user, sessions=sessions, datefrom=datefrom, dateto=dateto)
 
 
 @views.route('/statement_filters', methods=['GET', 'POST'])

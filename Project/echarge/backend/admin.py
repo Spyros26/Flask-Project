@@ -51,11 +51,11 @@ def users(current_user, username):
         return jsonify({'message' : 'The user was not found!'})
 
     if askformat=='json':
-        return jsonify({'username' : user.username, 'hashed_password' : user.password, 'role' : user.role})
+        return jsonify({'username' : user.username, 'hashed_password' : user.password, 'name' : user.name, 'role' : user.role})
 
     else:
-        return fcsv.send_csv([{'username' : user.username, 'hashed_password' : user.password, 'role' : user.role}], 
-                                "reply.csv", ["username", "hashed_password", "role"], delimiter=';')
+        return fcsv.send_csv([{'username' : user.username, 'hashed_password' : user.password, 'name' : user.name, 'role' : user.role}], 
+                                "reply.csv", ["username", "hashed_password", "name", "role"], delimiter=';')
 
 @admin.route('/admin/healthcheck', methods=['GET'])
 @token_required

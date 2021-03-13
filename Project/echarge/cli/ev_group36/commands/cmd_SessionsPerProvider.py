@@ -2,7 +2,7 @@ import click
 import requests
 
 
-url = "http://127.0.0.1:5000/SessionsPerProvider/"
+url = "http://localhost:8765/evcharge/api/SessionsPerProvider/"
 
 class Context:
     def __init__(self, provider, datefrom, dateto, format, apikey):
@@ -27,5 +27,7 @@ def cli(ctx, provider, datefrom, dateto, format, apikey):
 @cli.command()
 @click.pass_context
 def show(ctx):
+    if not ctx.obj.format:
+        ctx.obj.format = "json"
     response = requests.get(url + ctx.obj.provider + "/" + ctx.obj.datefrom + "/" + ctx.obj.dateto + "?format=" + ctx.obj.format, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
     print(response.text)
