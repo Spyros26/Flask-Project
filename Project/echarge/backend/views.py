@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from ..models import Session, User, Evehicle, Point
+from ..models import Session, User, Evehicle, Point, Station
 from .. import db
 import json, uuid, random
 from datetime import datetime, date, timedelta
@@ -8,6 +8,37 @@ from .sessions import sort_criteria
 
 views = Blueprint('views', __name__)
 
+def station_cords():
+    reply = []
+    stationlist = Station.query.all()
+    for station in stationlist:
+        if isinstance(station.website, str) and len(station.website)>5:
+            reply.append({'type': 'Feature',
+            'properties': {
+                'description': 
+                f'<strong>{station.name}</strong><p>Address: {station.address}. Number of charging points at this location is {len(station.points)}. Telephone: {station.phone}. E-mail: {station.email}. Website: <a href={station.website} target="_blank" title="Opens in a new window">{station.website}</a></p>',
+                'icon': 'charging-station'
+                },
+            'geometry': {
+                'type': 'Point',
+                'coordinates': [float(station.longitude), float(station.latitude)]
+            }
+        })
+        else:
+            reply.append({'type': 'Feature',
+            'properties': {
+                'description': 
+                f'<strong>{station.name}</strong><p>Address: {station.address}. Number of charging points at this location is {len(station.points)}. Telephone: {station.phone}. E-mail: {station.email}.</p>',
+                'icon': 'charging-station'
+                },
+            'geometry': {
+                'type': 'Point',
+                'coordinates': [float(station.longitude), float(station.latitude)]
+            }
+        })
+
+
+    return reply
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
@@ -122,5 +153,10 @@ def delete_session():
 
     return jsonify({})
 
+@views.route('/find_station_near_you', methods=['GET', 'POST'])
+def my_maps():
 
+    mapbox_access_token = 'pk.eyJ1IjoidGhhbm9zYmIzIiwiYSI6ImNrbTduZGEwYzBrb2cyb2xhOXI5MXowcnEifQ.Yj-JHpwSZreC1Z1-FVhIsA'
+
+    return render_template('map_index.html', user = current_user, mapbox_access_token=mapbox_access_token, POIs=station_cords())
 
