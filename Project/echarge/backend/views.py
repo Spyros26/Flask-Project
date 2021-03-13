@@ -16,7 +16,7 @@ def station_cords():
             reply.append({'type': 'Feature',
             'properties': {
                 'description': 
-                f'<strong>{station.name}</strong><p>Address: {station.address}. Number of charging points at this location is {len(station.points)}. Telephone: {station.phone}. E-mail: {station.email}. Website: <a href={station.website} target="_blank" title="Opens in a new window">{station.website}</a></p>',
+                f'<strong>{station.name}</strong><p> <br> Address: {station.address} <br> Number of charging points: {len(station.points)} <br> Telephone: {station.phone} <br> E-mail: {station.email} <br> Website: <a href={station.website} target="_blank" title="Opens in a new window">{station.website}</a></p>',
                 'icon': 'charging-station'
                 },
             'geometry': {
@@ -28,7 +28,7 @@ def station_cords():
             reply.append({'type': 'Feature',
             'properties': {
                 'description': 
-                f'<strong>{station.name}</strong><p>Address: {station.address}. Number of charging points at this location is {len(station.points)}. Telephone: {station.phone}. E-mail: {station.email}.</p>',
+                f'<strong>{station.name}</strong><p> <br> Address: {station.address} <br> Number of charging points: {len(station.points)} <br> Telephone: {station.phone} <br> E-mail: {station.email}</p>',
                 'icon': 'charging-station'
                 },
             'geometry': {
@@ -160,7 +160,7 @@ def delete_session():
 
     return jsonify({})
 
-@views.route('/find_station_near_you', methods=['GET', 'POST'])
+@views.route('/find_station_near_you', methods=['GET'])
 def my_maps():
 
     mapbox_access_token = 'pk.eyJ1IjoidGhhbm9zYmIzIiwiYSI6ImNrbTduZGEwYzBrb2cyb2xhOXI5MXowcnEifQ.Yj-JHpwSZreC1Z1-FVhIsA'
