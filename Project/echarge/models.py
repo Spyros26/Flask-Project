@@ -46,6 +46,10 @@ class Operator(db.Model):
 class Station(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     station_id = db.Column(db.String(50), unique=True)
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(100))
+    phone = db.Column(db.String(15))
+    website = db.Column(db.String(100))
     address = db.Column(db.String(120))
     latitude = db.Column(db.String(25))
     longitude = db.Column(db.String(25))

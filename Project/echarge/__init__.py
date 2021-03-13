@@ -135,7 +135,7 @@ def default_points_stations(filename):
 
     from .models import Station, Point, Operator, Energyprovider
     
-    col_list = ["_id", "AddressInfo.ID", "AddressInfo.AddressLine1", "AddressInfo.Latitude", "AddressInfo.Longitude"]
+    col_list = ["_id", "AddressInfo.ID", "AddressInfo.Title", "AddressInfo.AddressLine1", "AddressInfo.Latitude", "AddressInfo.Longitude", "AddressInfo.ContactTelephone1", "AddressInfo.ContactEmail", "AddressInfo.RelatedURL"]
 
     df = pd.read_csv(filename, sep=",", nrows=100, usecols=col_list)
 
@@ -143,15 +143,23 @@ def default_points_stations(filename):
     provider_table = Energyprovider.query.all()
 
     for _, x in df.iterrows():
-        if isinstance(x["AddressInfo.AddressLine1"], str) and isinstance(x["_id"], str):
+        if isinstance(x["AddressInfo.AddressLine1"], str) and isinstance(x["AddressInfo.Title"], str) and isinstance(x["_id"], str):
 
             check = Station.query.filter_by(address=x["AddressInfo.AddressLine1"]).first()
             if not check:
+                phone = x["AddressInfo.ContactTelephone1"]
+
+                mail = x["AddressInfo.ContactEmail"]
+
+                site = x["AddressInfo.RelatedURL"]
+
                 operator = random.choice(operator_table)
                 provider = random.choice(provider_table)
-                new_station = Station(station_id=str(x["AddressInfo.ID"]), address=x["AddressInfo.AddressLine1"], 
-                            latitude=x["AddressInfo.Latitude"], longitude=x["AddressInfo.Longitude"],
-                            operator_id=operator.id, provider_id=provider.id)            
+                new_station = Station(station_id=str(x["AddressInfo.ID"]), 
+                                name=x["AddressInfo.Title"], email=mail, 
+                                phone=phone, website=site, address=x["AddressInfo.AddressLine1"], 
+                                latitude=x["AddressInfo.Latitude"], longitude=x["AddressInfo.Longitude"],
+                                operator_id=operator.id, provider_id=provider.id)            
                 this_station = new_station
                 db.session.add(new_station)
                 db.session.commit()
