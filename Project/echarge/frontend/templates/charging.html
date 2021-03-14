@@ -4,6 +4,16 @@
 </br>
 <h4 align="center" id="duration">Please wait. Total Charging duration in minutes is {{ duration }}</h4>
 </br>
+<h4 align="center" id="estimated_cost">
+  {% if session.protocol == "Level 1: Low" %}
+    Estimated cost is {{ round_cost(1*0.15*session.kWh_delivered) }}$
+  {% elif session.protocol == "Level 2: Medium" %}
+    Estimated cost is {{ round_cost(2*0.15*session.kWh_delivered) }}$
+  {% else %}
+    Estimated cost is {{ round_cost(3*0.15*session.kWh_delivered) }}$
+  {% endif %}
+</h4>
+</br>
 <div align="center">
   <div class="progress-bar"  style="--width: 0" data-label="Charging..."></div>
 </div>

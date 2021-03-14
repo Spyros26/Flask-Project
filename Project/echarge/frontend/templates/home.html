@@ -2,6 +2,8 @@
 %}
 <h1 align="center">Charge</h1>
 <h4 align="center">Hi {{ user.name }}! Please fill the form to charge your EV:</h4>
+</br>
+</br>
 <form method="POST">
   <div class="form-group">
     <label for="car_id">EV ID</label>
@@ -13,6 +15,11 @@
       placeholder="Enter EV ID"
     />
   </div>
+<div align="center">
+  <h6>Pricing based on KWh delivered and Session Protocol.</h6>
+  <h8> e.g: Session cost = cost_rate*kWh_delivered*costPerKWh <br> where cost_rate = 1   (Session Protocol = Level 1: Low) <br> cost_rate = 2   (Session Protocol = Level 2: Medium) <br> cost_rate = 3   (Session Protocol = Level 3: High)</h8>
+</div>
+</br>
   <div class="form-group">
     <label for="kWh Requested">kWh Requested</label>
     <input

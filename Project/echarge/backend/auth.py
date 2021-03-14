@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, Response, make_response
-from ..models import User, RevokedToken
+from ..models import User, RevokedToken, Evehicle
 from werkzeug.security import generate_password_hash, check_password_hash
 from .. import db
 from flask_login import login_user, login_required, logout_user, current_user
@@ -123,11 +123,18 @@ def sign_up():
         username = request.form.get('username')
         name = request.form.get('Name')
         email = request.form.get('email')
+        car_brand = request.form.get('car_brand')
+        car_model = request.form.get('car_model')
+        car_id = request.form.get('car_id')
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
 
+        ev = Evehicle.query.filter_by(car_id=car_id).first()
         user = User.query.filter_by(username=username).first()
-        if user:
+        if ev:
+            flash('EV already exists.', category='error')
+            status=400 
+        elif user:
             flash('Username already exists.', category='error')
             status=400
         elif len(username) < 4:
@@ -135,6 +142,12 @@ def sign_up():
             status=400
         elif len(name) < 2:
             flash('Name must be greater than 1 character.', category='error')
+            status=400
+        elif len(car_brand) < 2:
+            flash('Car Brand must be greater than 1 character.', category='error')
+            status=400
+        elif len(car_model) < 2:
+            flash('Car Model must be greater than 1 character.', category='error')
             status=400
         elif password1 != password2:
             flash('Passwords don\'t match.', category='error')
@@ -146,6 +159,9 @@ def sign_up():
             new_user = User(username=username, password=generate_password_hash(
                 password1, method='sha256'), name=name, email=email, role="User")
             db.session.add(new_user)
+            db.session.commit()
+            new_ev = Evehicle(car_id=car_id, brand=car_brand, model=car_model, user_id=new_user.id)
+            db.session.add(new_ev)
             db.session.commit()
             login_user(new_user, remember=True)
             flash('Account created!', category='success')

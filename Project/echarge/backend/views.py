@@ -16,7 +16,7 @@ def station_cords():
             reply.append({'type': 'Feature',
             'properties': {
                 'description': 
-                f'<strong>{station.name}</strong><p> <br> Address: {station.address} <br> Number of charging points: {len(station.points)} <br> Telephone: {station.phone} <br> E-mail: {station.email} <br> Website: <a href={station.website} target="_blank" title="Opens in a new window">{station.website}</a></p>',
+                f'<strong>{station.name}</strong><p> <br> Address: {station.address} <br> Number of charging points: {len(station.points)} <br> Point Ids List: {[x.point_id for x in station.points]} <br> Telephone: {station.phone} <br> E-mail: {station.email} <br> Website: <a href={station.website} target="_blank" title="Opens in a new window">{station.website}</a></p>',
                 'icon': 'charging-station'
                 },
             'geometry': {
@@ -28,7 +28,7 @@ def station_cords():
             reply.append({'type': 'Feature',
             'properties': {
                 'description': 
-                f'<strong>{station.name}</strong><p> <br> Address: {station.address} <br> Number of charging points: {len(station.points)} <br> Telephone: {station.phone} <br> E-mail: {station.email}</p>',
+                f'<strong>{station.name}</strong><p> <br> Address: {station.address} <br> Number of charging points: {len(station.points)} <br> Point Ids List: {[x.point_id for x in station.points]} <br> Telephone: {station.phone} <br> E-mail: {station.email}</p>',
                 'icon': 'charging-station'
                 },
             'geometry': {
@@ -109,7 +109,7 @@ def charging(sessionID):
         tdelta = timedelta(days=0, seconds=tdelta.seconds, microseconds=tdelta.microseconds)
     duration = round(tdelta.total_seconds()/60, 2)
 
-    return render_template("charging.html", user=current_user, duration=duration)
+    return render_template("charging.html", user=current_user, duration=duration, session=current_session)
 
 
 @views.route('/issue-statement/<datefrom>/<dateto>', methods=['GET', 'POST'])
