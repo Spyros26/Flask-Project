@@ -1,6 +1,6 @@
 # Flask Web App Project for NTUA Software Engineering Class
 # EV Charging System
-## by: Georgoutsos Athanasios, Dragazis Spyridon, Valouxis Spyridon
+#### by: Georgoutsos Athanasios, Dragazis Spyridon, Valouxis Spyridon
 
 ## Setup & Installtion
 
