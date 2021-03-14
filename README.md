@@ -10,7 +10,7 @@
 
 ## User Roles
 
-1. Admin (default admin acc has username: admin and password: petrol4ever)
+1. Admin (default admin account has username: admin and password: petrol4ever)
 
 2. Privileged (role for privileged stakeholders who can access SessionsPerXX endpoints from cli)
 
