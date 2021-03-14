@@ -137,7 +137,8 @@ def default_points_stations(filename):
     
     col_list = ["_id", "AddressInfo.ID", "AddressInfo.Title", "AddressInfo.AddressLine1", "AddressInfo.Latitude", "AddressInfo.Longitude", "AddressInfo.ContactTelephone1", "AddressInfo.ContactEmail", "AddressInfo.RelatedURL"]
 
-    df = pd.read_csv(filename, sep=",", nrows=100, usecols=col_list)
+    df = pd.read_csv(filename, sep=",", nrows=1000, usecols=col_list)
+    #df = pd.read_csv(filename, sep=",", usecols=col_list)
 
     operator_table = Operator.query.all()
     provider_table = Energyprovider.query.all()
@@ -333,7 +334,11 @@ def initializer():
     default_admin('admin','petrol4ever')
     default_providers()
     default_operators('echarge/backend/static/Operators_data.csv')
-    default_points_stations('echarge/backend/static/points.csv')
+    default_points_stations('echarge/backend/static/points1.csv')
+    #default_points_stations('echarge/backend/static/points2.csv')
+    #default_points_stations('echarge/backend/static/points3.csv')
+    #default_points_stations('echarge/backend/static/points4.csv')
+    #default_points_stations('echarge/backend/static/points5.csv')
     default_users()
     default_evs('echarge/backend/static/electric_vehicles_data.json')
     default_sessions('echarge/backend/static/caltech_acndata_sessions_12month.json')

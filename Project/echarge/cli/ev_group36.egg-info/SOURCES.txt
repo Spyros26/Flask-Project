@@ -10,5 +10,11 @@ ev_group36.egg-info/requires.txt
 ev_group36.egg-info/top_level.txt
 ev_group36/commands/__init__.py
 ev_group36/commands/cmd_Admin.py
+ev_group36/commands/cmd_SessionsPerEV.py
+ev_group36/commands/cmd_SessionsPerPoint.py
+ev_group36/commands/cmd_SessionsPerProvider.py
+ev_group36/commands/cmd_SessionsPerStation.py
+ev_group36/commands/cmd_login.py
+ev_group36/commands/cmd_logout.py
 ev_group36/service/__init__.py
 ev_group36/service/svc_Admin.py

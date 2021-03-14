@@ -1,5 +1,6 @@
 import os
 import click
+import importlib
 
 
 class ComplexCLI(click.MultiCommand):
