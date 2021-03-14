@@ -3,6 +3,13 @@
 <h1 align="center">Your Charging Sessions</h1>
 <h4 align="center" id="dates">From {{ datefrom }} To {{ dateto }}</h4>
 </br>
+<form method="POST">
+  
+  <br />
+  <div align="center">
+    <button type="submit" name="optb" value="optb" class="btn btn-primary">View Money Spent</button>
+  </div>
+</form>
 <ul class="list-group list-group-flush" id="charging_sessions">
   {% for charging_session in sessions %}
   <li class="list-group-item">
@@ -41,7 +48,7 @@
   
   <br />
   <div align="center">
-    <button type="submit" class="btn btn-primary">Issue Statement</button>
+    <button type="submit" name="opta" value="opta" class="btn btn-primary">Issue Statement</button>
   </div>
 </form>
 {% endblock %}

@@ -116,8 +116,11 @@ def charging(sessionID):
 @login_required
 def view_sessions(datefrom, dateto):
     if request.method == 'POST':
-        flash('The statement has been successfully issued!', category='success')
-        return redirect(url_for('views.home'))
+        if request.form.get("opta"):
+            flash('The statement has been successfully issued!', category='success')
+            return redirect(url_for('views.home'))
+        elif request.form.get("optb"):
+            return redirect(url_for('views.chart', datefrom=datefrom, dateto=dateto))
     
     sessions = []
     date_from = datefrom[:4] + datefrom[5:7] + datefrom[8:]
@@ -167,3 +170,33 @@ def my_maps():
 
     return render_template('map_index.html', user = current_user, mapbox_access_token=mapbox_access_token, POIs=station_cords())
 
+@views.route('/chart/<datefrom>/<dateto>', methods=['GET', 'POST'])
+@login_required
+def chart(datefrom, dateto):
+    sessions = []
+    date_from = datefrom[:4] + datefrom[5:7] + datefrom[8:]
+    date_to = dateto[:4] + dateto[5:7] + dateto[8:]
+
+    for i in range(len(current_user.evs)):
+        pool = Session.query.filter((Session.ev_id==current_user.evs[i].id) & (Session.connection_date>=date_from) & (Session.done_date<=date_to)).all()
+        sessions = sessions + pool
+    sessions.sort(key=sort_criteria)
+
+    y = 1
+    money_spent = 0
+    cost = []
+    sesindex = []
+    for x in sessions:
+        sesindex.append(y)
+
+        if x.protocol =="Level 1: Low":
+            money_spent = round(money_spent + round(1*0.15*x.kWh_delivered,2),2)
+        elif x.protocol =="Level 2: Medium":
+            money_spent = round(money_spent + round(2*0.15*x.kWh_delivered,2),2)
+        else:
+            money_spent = round(money_spent + round(3*0.15*x.kWh_delivered,2),2)
+
+        cost.append(money_spent)
+        y = y + 1
+
+    return render_template('chart.html', user = current_user, title='Total money spent over filtered sessions', max=money_spent, labels=sesindex, values=cost)    
