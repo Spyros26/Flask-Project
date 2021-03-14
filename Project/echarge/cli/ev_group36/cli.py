@@ -16,8 +16,10 @@ class ComplexCLI(click.MultiCommand):
 
     def get_command(self, ctx, name):
         try:
+            print(1)
             mod = __import__(f"ev_group36.commands.cmd_{name}", None, None, ["cli"])
         except ImportError:
+            print(2)
             return
         return mod.cli
 
