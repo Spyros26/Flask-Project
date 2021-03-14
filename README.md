@@ -1,4 +1,5 @@
-# Flask Web App Project
+# Flask Web App Project for NTUA Software Engineering Class
+## EV Charging System
 
 ## Setup & Installtion
 
