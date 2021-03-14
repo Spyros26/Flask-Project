@@ -17,6 +17,9 @@ def usermod(current_user, username, password, role):
     if current_user.role != "Admin":
         return make_response('Not allowed to perform this action!', 401)
 
+    if role not in ["User", "Privileged", "Admin"]:
+        return make_response('Not valid role! Valid roles are: User, Privileged, Admin', 400)
+        
     user = User.query.filter_by(username=username).first()
 
     hashed_password = generate_password_hash(password, method='sha256')
