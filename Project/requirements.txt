@@ -5,3 +5,10 @@ flask-login
 flask_csv
 pandas
 PyJWT==1.6.4
+pytest
+requests
+click==7.1.2
+HTTPBasicAuth
+json
+jsonpath
+selenium
