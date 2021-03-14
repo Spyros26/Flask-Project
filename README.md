@@ -6,7 +6,7 @@
 
 1. Charging EV
 
-2. Issue Statement (statement with all the charging sessions in a selected period)
+2. Issue Statement (statement with all the user's charging sessions in a selected period)
 
 ## User Roles
 
