@@ -4,9 +4,17 @@
 
 ## Main Use-Cases
 
-1.Charging EV
+1. Charging EV
 
-2.Issue Statement (statement with all the charging sessions in a selected period)
+2. Issue Statement (statement with all the charging sessions in a selected period)
+
+## User Roles
+
+1. Admin (default admin acc has username: admin and password: petrol4ever)
+
+2. Privileged (role for privileged stakeholders who can access SessionsPerXX endpoints from cli)
+
+3. User (role for typical EVUsers)
 
 ## Setup & Installtion
 
