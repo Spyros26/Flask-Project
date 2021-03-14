@@ -6,6 +6,7 @@ import json, uuid, random
 from datetime import datetime, date, timedelta
 from .sessions import sort_criteria
 
+
 views = Blueprint('views', __name__)
 
 def station_cords():
