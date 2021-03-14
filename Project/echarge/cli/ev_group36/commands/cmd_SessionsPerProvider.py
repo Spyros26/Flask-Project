@@ -17,7 +17,7 @@ class Context:
 @click.option("--provider")
 @click.option("--datefrom")
 @click.option("--dateto")
-@click.option("--format")
+@click.option("--format", default="json", show_default=True)
 @click.option("--apikey")
 @click.pass_context
 def cli(ctx, provider, datefrom, dateto, format, apikey):
@@ -27,7 +27,5 @@ def cli(ctx, provider, datefrom, dateto, format, apikey):
 @cli.command()
 @click.pass_context
 def show(ctx):
-    if not ctx.obj.format:
-        ctx.obj.format = "json"
     response = requests.get(url + ctx.obj.provider + "/" + ctx.obj.datefrom + "/" + ctx.obj.dateto + "?format=" + ctx.obj.format, headers = {'X-OBSERVATORY-AUTH':ctx.obj.apikey})
     print(response.text)
