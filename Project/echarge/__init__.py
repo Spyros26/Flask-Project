@@ -98,16 +98,17 @@ def default_evs(filename):
     cont = pd.DataFrame(evs['data'])    
     length = cont.shape[0]
 
-    for x in range(0,length):
-        check = Evehicle.query.filter_by(car_id=cont["id"][x]).first()
+    for x in range(0,500):
+        check = Evehicle.query.filter_by(car_id=f"EV{x+1}").first()
         if not check:
+            y = random.randint(0,length-1)
             user = User.query.filter_by(username=f"User{x+1}").first()
-            new_ev = Evehicle(car_id=cont["id"][x], brand=cont["brand"][x], 
-                        car_type=cont["type"][x], brand_id=cont["brand_id"][x],
-                        model=cont["model"][x], release_year=cont["release_year"][x],
-                        variant=cont["variant"][x], usable_battery_size=cont["usable_battery_size"][x],
-                        ac_charger=cont["ac_charger"][x], dc_charger=cont["dc_charger"][x],
-                        energy_consumption=cont["energy_consumption"][x], user_id=user.id)
+            new_ev = Evehicle(car_id=f"EV{x+1}", brand=cont["brand"][y], 
+                        car_type=cont["type"][y], brand_id=cont["brand_id"][y],
+                        model=cont["model"][y], release_year=cont["release_year"][y],
+                        variant=cont["variant"][y], usable_battery_size=cont["usable_battery_size"][y],
+                        ac_charger=cont["ac_charger"][y], dc_charger=cont["dc_charger"][y],
+                        energy_consumption=cont["energy_consumption"][y], user_id=user.id)
             db.session.add(new_ev)
             db.session.commit()
     print('Default EVs are in')                    
@@ -175,7 +176,7 @@ def default_points_stations(filename):
 def default_users():
     from .models import User
     names = ["Liam", "Olivia", "Noah",	"Emma", "Oliver", "Ava", "William", "Sophia", "Elijah", "Isabella", "James", "Charlotte", "Benjamin", "Amelia", "Lucas", "Mia", "Mason", "Harper", "Ethan", "Evelyn"]
-    for x in range(1,144):
+    for x in range(1,501):
         username = f"User{x}"
         password = f"password{x}"
         name = names[x % 20]
@@ -217,9 +218,9 @@ def default_sessions(filename):
     payment_table = ["Credit_Card", "Debit_Card", "Smartphone_Wallet",
                     "Website_Payment", "QR_Code", "Cash"]
 
-    for x in range(0,500):
+    for x in range(0,len(cont)):
         check = Session.query.filter_by(session_id=cont["_id"][x]).first()
-        if not check:
+        if not check and isinstance(cont["connectionTime"][x], str) and isinstance(cont["doneChargingTime"][x], str) and isinstance(cont["disconnectTime"][x], str):
             edit_start = cont["connectionTime"][x]
             
             year_start = edit_start[12:16]
@@ -267,7 +268,7 @@ def default_sessions(filename):
                                 protocol=protocol ,payment=payment ,ev_id=ev.id, point_id=point.id)
             db.session.add(new_session)
             db.session.commit()
-    print('First 500 Sessions are in')
+    print('Sessions are in')
 
 def months_to_nums(x):
     
