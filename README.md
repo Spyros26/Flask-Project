@@ -22,4 +22,4 @@ python main.py
 
 ## Viewing The App
 
-Go to `http://localhost:8765/evcharge/api/
+Go to http://localhost:8765/evcharge/api/
