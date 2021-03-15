@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% extends "base.html" %} {% block title %}Cost Chart{% endblock %} {% block content
+{% extends "base.html" %} {% block title %}Charts{% endblock %} {% block content
 %}
 <html lang="en">
 <head>
@@ -68,6 +68,32 @@
       });
 
     </script>
+
+    <form method="POST">
+      <div class="form-group">
+        <label for="axis_y">Y-axis to plot:</label>
+        <select name="axis_y" id="axis_y">
+          <option value="total_money">Total Money Paid</option>
+          <option value="total_kwh">Total KWh Delivered</option>
+          <option value="kwh">KWh Delivered</option>
+          <option value="money">Money Paid</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="axis_x">X-axis to plot:</label>
+        <select name="axis_x" id="axis_x">
+          <option value="Index">Sessions</option>
+          <option value="Dates">Session Dates</option>
+        </select>
+      </div>
+
+      <br />
+      <div align="center">
+        <button type="submit" name="plot" value="plot" class="btn btn-primary" style="display:inline-block;">Show Chart</button>
+        <button type="submit" name="back" value="back" class="btn btn-primary" style="display:inline-block;margin-top:0;">Go Back</button>
+      </div>
+    </form>
+
   </center>
 </body>
 </html>
