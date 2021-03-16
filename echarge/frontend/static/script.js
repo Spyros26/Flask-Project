@@ -1,13 +1,28 @@
 const progressBar = document.getElementsByClassName('progress-bar')[0]
-var duration = parseFloat(document.getElementById('duration').innerHTML.substr(50))*60
+var duration = parseFloat(document.getElementById('duration').getAttribute('value'))*60000
+var connection = document.getElementById('connection').getAttribute('value')
   
-  setInterval(() => {
-    const computedStyle = getComputedStyle(progressBar)
-    const width = parseFloat(computedStyle.getPropertyValue('--width')) || 0
-    progressBar.style.setProperty('--width', width + 2/duration)
-    if (width >= 100) {   
-      //nothing  
-    }
-  }, 20)
+function start() {
+  startedAt = connection
+  updateTarget(0)
+  requestAnimationFrame(update)
+}
+  
+function update() {
+  let elapsedTime = Date.now() - startedAt
+  
+  // playback is a value between 0 and 1
+  // being 0 the start of the charge and 1 its end
+  let playback = elapsedTime / duration
+  
+  updateTarget(playback)
+  requestAnimationFrame(update)
 
-
+}
+  
+function updateTarget(playback) {
+  // Update the width of the bar based on the playback position
+  progressBar.style.setProperty('--width', playback*100)
+  }
+  
+  start()

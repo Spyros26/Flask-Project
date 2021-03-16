@@ -43,8 +43,9 @@
   <h1 align="center">Charging...</h1>
   </br>
   </br>
-  <h4 align="center" id="duration">Please wait. Total Charging duration in minutes is {{ duration }}</h4>
+  <h4 align="center" id="duration" value={{ duration }}>Please wait... Total Charging Duration: {{ show_waiting_time(duration)[0] }}m {{ show_waiting_time(duration)[1] }}s</h4>
   </br>
+  <div id="connection" align="center" value={{ connection }}></div>
   <h4 align="center" id="estimated_cost">
     {% if session.protocol == "Level 1: Low" %}
       Estimated cost is {{ round_cost(1*0.15*session.kWh_delivered) }}$
@@ -58,7 +59,7 @@
   </br>
   </br>
   <div align="center">
-    <div class="progress-bar"  style="--width: 0" data-label="Charging..."></div>
+    <div class="progress-bar" data-label="Charging..."></div>
   </div>
 
   <div class="container">{% block content %} {% endblock %}</div>
@@ -81,11 +82,6 @@
   <script
     type="text/javascript"
     src="{{ url_for('static', filename='script.js') }}"
-  ></script>
-
-  <script
-    type="text/javascript"
-    src="{{ url_for('static', filename='index.js') }}"
   ></script>
 
   <form method="POST"> 

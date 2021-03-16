@@ -46,6 +46,7 @@ def create_app():
     App.jinja_env.globals.update(energy_provider=energy_provider)
     App.jinja_env.globals.update(station_address=station_address)
     App.jinja_env.globals.update(round_cost=round_cost)
+    App.jinja_env.globals.update(show_waiting_time=show_waiting_time)
 
     return App
 
@@ -54,6 +55,9 @@ def create_database(app):
     if not path.exists('echarge/' + DB_NAME):
         db.create_all(app=app)
         print('Created Database!')
+
+def show_waiting_time(d):
+    return [int(d), int(round(100*(d%1), 2))]
 
 def round_cost(x):
     return round(x, 2)

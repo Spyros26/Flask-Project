@@ -111,13 +111,13 @@ def charging(sessionID):
         flash('Charging stopped!', category='success')
         return redirect(url_for('views.home'))
 
+    connection = 1000*int(datetime(int(current_session.connection_date[:4]), int(current_session.connection_date[4:6]), int(current_session.connection_date[6:8]), int(current_session.connection_time[:2]), int(current_session.connection_time[2:4]), int(current_session.connection_time[4:6]) ).timestamp()) 
     FMT = '%H%M%S'
     tdelta = datetime.strptime(current_session.done_time, FMT) - datetime.strptime(current_session.connection_time, FMT)
     if tdelta.days < 0:
         tdelta = timedelta(days=0, seconds=tdelta.seconds, microseconds=tdelta.microseconds)
     duration = round(tdelta.total_seconds()/60, 2)
-
-    return render_template("charging.html", user=current_user, duration=duration, session=current_session)
+    return render_template("charging.html", user=current_user, duration=duration, session=current_session, connection=connection)
 
 
 @views.route('/issue-statement/<datefrom>/<dateto>', methods=['GET', 'POST'])
