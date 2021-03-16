@@ -57,7 +57,7 @@ def create_database(app):
         print('Created Database!')
 
 def show_waiting_time(d):
-    return [int(d), int(round(100*(d%1), 2))]
+    return [(int(d*100))//3600, ((int(d*100))%3600)//60, (((int(d*100))%3600)%60)%60]
 
 def round_cost(x):
     return round(x, 2)

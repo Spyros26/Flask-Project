@@ -271,7 +271,7 @@ def chart(datefrom, dateto):
                                 index = index + 1
                             check = item.connection_date    
                         else:
-                            ver[index] = ver[index] + (round(cost_rate(item.protocol)*0.15*item.kWh_delivered,2))
+                            ver[index] = (round(ver[index] + cost_rate(item.protocol)*0.15*item.kWh_delivered, 2))
                     title = "Money Paid on Each Date"
                                     
 
