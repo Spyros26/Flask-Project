@@ -11,7 +11,8 @@
 <body>
   <center>
     <h1>{{ title }}</h1>
-
+    </br>
+    </br>
     <canvas id="chart" width="600" height="400"></canvas>
     <script>
 
@@ -73,24 +74,25 @@
       <div class="form-group">
         <label for="axis_y">Y-axis to plot:</label>
         <select name="axis_y" id="axis_y">
-          <option value="total_money">Total Money Paid</option>
-          <option value="total_kwh">Total KWh Delivered</option>
-          <option value="kwh">KWh Delivered</option>
-          <option value="money">Money Paid</option>
+          <option value="total_money" {% if y == "total_money" %} selected {% endif %}>Total Money Paid</option>
+          <option value="total_kwh" {% if y == "total_kwh" %} selected {% endif %}>Total KWh Delivered</option>
+          <option value="kwh" {% if y == "kwh" %} selected {% endif %}>KWh Delivered</option>
+          <option value="money" {% if y == "money" %} selected {% endif %}>Money Paid</option>
         </select>
       </div>
+
       <div class="form-group">
         <label for="axis_x">X-axis to plot:</label>
         <select name="axis_x" id="axis_x">
-          <option value="Index">Sessions</option>
-          <option value="Dates">Session Dates</option>
+          <option value="Index" {% if x == "Index" %} selected {% endif %}>Sessions</option>
+          <option value="Dates" {% if x == "Dates" %} selected {% endif %}>Session Dates</option>
         </select>
       </div>
 
       <br />
       <div align="center">
         <button type="submit" name="plot" value="plot" class="btn btn-primary" style="display:inline-block;">Show Chart</button>
-        <button type="submit" name="back" value="back" class="btn btn-primary" style="display:inline-block;margin-top:0;">Go Back</button>
+        <button type="submit" name="back" value="back" class="btn btn-primary" style="display:inline-block;margin-top:0;">Go Back to Statement</button>
       </div>
     </form>
 

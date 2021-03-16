@@ -9,6 +9,13 @@ from .sessions import sort_criteria
 
 views = Blueprint('views', __name__)
 
+def cost_rate(protocol):
+    if protocol =="Level 1: Low":
+        return 1
+    elif protocol =="Level 2: Medium":
+        return 2
+    return 3
+
 def station_cords():
     reply = []
     stationlist = Station.query.all()
@@ -184,7 +191,7 @@ def chart(datefrom, dateto):
             date_from = datefrom[:4] + datefrom[5:7] + datefrom[8:]
             date_to = dateto[:4] + dateto[5:7] + dateto[8:]
 
-            startdate = datefrom[8:] + "/" + datefrom[5:7] + "/" + datefrom[:4]
+            #startdate = datefrom[8:] + "/" + datefrom[5:7] + "/" + datefrom[:4]
 
             for i in range(len(current_user.evs)):
                 pool = Session.query.filter((Session.ev_id==current_user.evs[i].id) & (Session.connection_date>=date_from) & (Session.done_date<=date_to)).all()
@@ -204,37 +211,26 @@ def chart(datefrom, dateto):
                 kwh = 0
                 if y=="total_money":
                     for item in sessions:
-                        if item.protocol =="Level 1: Low":
-                            money_spent = round(money_spent + round(1*0.15*item.kWh_delivered,2),2)
-                        elif item.protocol =="Level 2: Medium":
-                            money_spent = round(money_spent + round(2*0.15*item.kWh_delivered,2),2)
-                        else:
-                            money_spent = round(money_spent + round(3*0.15*item.kWh_delivered,2),2)
-
+                        money_spent = round(money_spent + cost_rate(item.protocol)*0.15*item.kWh_delivered, 2)
                         ver.append(money_spent)
 
-                    title = "[Total Money Paid] for Sessions 1 to [Session]"    
+                    title = "Total Money Paid for Sessions"    
 
                 elif y=="money":
                     for item in sessions:
-                        if item.protocol =="Level 1: Low":
-                            ver.append(round(1*0.15*item.kWh_delivered,2))
-                        elif item.protocol =="Level 2: Medium":
-                            ver.append(round(2*0.15*item.kWh_delivered,2))
-                        else:
-                            ver.append(round(3*0.15*item.kWh_delivered,2))
-                    title = "[Money Paid] at [Session]"        
+                        ver.append(round(cost_rate(item.protocol)*0.15*item.kWh_delivered,2))
+                    title = "Money Paid for Each Session"        
 
                 elif y=="total_kwh":
                     for item in sessions:
                         kwh = round(kwh + item.kWh_delivered, 2)
                         ver.append(kwh)
-                    title = "[Total KWh Delivered] for Sessions 1 to [Session]"    
+                    title = "Total KWh Delivered during Sessions"    
 
                 else:
                     for item in sessions:
-                        ver.append(item.kWh_delivered)
-                    title = "[KWh Delivered] at [Session]"                        
+                        ver.append(round(item.kWh_delivered, 2))
+                    title = "KWh Delivered during Each Session"                        
 
 
             else:
@@ -255,12 +251,7 @@ def chart(datefrom, dateto):
                 if y=="total_money":
 
                     for item in sessions:
-                        if item.protocol =="Level 1: Low":
-                            money_spent = round(money_spent + round(1*0.15*item.kWh_delivered,2),2)
-                        elif item.protocol =="Level 2: Medium":
-                            money_spent = round(money_spent + round(2*0.15*item.kWh_delivered,2),2)
-                        else:
-                            money_spent = round(money_spent + round(3*0.15*item.kWh_delivered,2),2)
+                        money_spent = round(money_spent + cost_rate(item.protocol)*0.15*item.kWh_delivered, 2)
 
                         if check!=item.connection_date:
                             ver.append(money_spent)
@@ -269,29 +260,19 @@ def chart(datefrom, dateto):
                             check = item.connection_date
                         else:
                             ver[index] = money_spent
-                    title = f"[Total Money Paid] from {startdate} to [Date]"       
+                    title = "Total Money Paid for Sessions"       
 
 
                 elif y=="money":
                     for item in sessions:
                         if check!=item.connection_date:
-                            if item.protocol =="Level 1: Low":
-                                ver.append(round(1*0.15*item.kWh_delivered,2))
-                            elif item.protocol =="Level 2: Medium":
-                                ver.append(round(2*0.15*item.kWh_delivered,2))
-                            else:
-                                ver.append(round(3*0.15*item.kWh_delivered,2))
+                            ver.append(round(cost_rate(item.protocol)*0.15*item.kWh_delivered,2))
                             if check!="0":    
                                 index = index + 1
                             check = item.connection_date    
                         else:
-                            if item.protocol =="Level 1: Low":
-                                ver[index] = ver[index] + (round(1*0.15*item.kWh_delivered,2))
-                            elif item.protocol =="Level 2: Medium":
-                                ver[index] = ver[index] + (round(2*0.15*item.kWh_delivered,2))
-                            else:
-                                ver[index] = ver[index] + (round(3*0.15*item.kWh_delivered,2))
-                    title = "[Money Paid] at [Date]"
+                            ver[index] = ver[index] + (round(cost_rate(item.protocol)*0.15*item.kWh_delivered,2))
+                    title = "Money Paid on Each Date"
                                     
 
                 elif y=="total_kwh":
@@ -304,7 +285,7 @@ def chart(datefrom, dateto):
                             check = item.connection_date
                         else:
                             ver[index] = kwh
-                    title = f"[Total KWh Delivered] from {startdate} to [Date]"            
+                    title = "Total KWh Delivered during Sessions"            
 
                 else:
                     for item in sessions:
@@ -315,9 +296,9 @@ def chart(datefrom, dateto):
                             check = item.connection_date
                         else:
                             ver[index] = round(ver[index] + item.kWh_delivered,2)
-                    title = "[KWh Delivered] at [Date]"                                        
+                    title = "KWh Delivered on Date"                                        
 
-            return render_template('chart.html', user = current_user, title=title, max=max(ver), labels=hor, values=ver)
+            return render_template('chart.html', user = current_user, title=title, max=max(ver), labels=hor, values=ver, y=y, x=x)
 
 
     sessions = []
@@ -335,15 +316,8 @@ def chart(datefrom, dateto):
     sesindex = []
     for x in sessions:
         sesindex.append(y)
-
-        if x.protocol =="Level 1: Low":
-            money_spent = round(money_spent + round(1*0.15*x.kWh_delivered,2),2)
-        elif x.protocol =="Level 2: Medium":
-            money_spent = round(money_spent + round(2*0.15*x.kWh_delivered,2),2)
-        else:
-            money_spent = round(money_spent + round(3*0.15*x.kWh_delivered,2),2)
-
+        money_spent = round(money_spent + cost_rate(x.protocol)*0.15*x.kWh_delivered, 2)
         cost.append(money_spent)
         y = y + 1
 
-    return render_template('chart.html', user = current_user, title="[Total Money Paid] for Sessions 1 to [Session]", max=money_spent, labels=sesindex, values=cost)    
+    return render_template('chart.html', user = current_user, title="Total Money Paid", max=money_spent, labels=sesindex, values=cost, y=y, x=x)    
