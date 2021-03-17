@@ -57,7 +57,7 @@ def create_database(app):
         print('Created Database!')
 
 def show_waiting_time(d):
-    float_time = d  # in minutes
+    float_time = d/60000  # in minutes
     hours, seconds = divmod(float_time * 60, 3600)  # split to hours and seconds
     minutes, seconds = divmod(seconds, 60)  # split the seconds to minutes and seconds
     return [int(hours), int(minutes), int(seconds)]

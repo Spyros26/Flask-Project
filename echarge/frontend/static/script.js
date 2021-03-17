@@ -1,5 +1,5 @@
 const progressBar = document.getElementsByClassName('progress-bar')[0]
-var duration = parseFloat(document.getElementById('duration').getAttribute('value'))*60000
+var duration = parseFloat(document.getElementById('duration').getAttribute('value'))
 var connection = document.getElementById('connection').getAttribute('value')
   
 function start() {
