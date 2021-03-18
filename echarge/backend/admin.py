@@ -118,7 +118,7 @@ def sessions_update(current_user):
 
             for x in range(0,length):
                 check = Session.query.filter_by(session_id=cont["_id"][x]).first()
-                if not check:
+                if not check and isinstance(cont["connectionTime"][x], str) and isinstance(cont["doneChargingTime"][x], str) and isinstance(cont["disconnectTime"][x], str):
                     edit_start = cont["connectionTime"][x]
                     year_start = edit_start[12:16]
                     month_start = months_to_nums(edit_start[8:11])
