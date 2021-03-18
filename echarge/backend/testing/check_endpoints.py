@@ -31,6 +31,18 @@ def test_admin_usermod_users():
     response = requests.get("http://localhost:8765/evcharge/api/admin/users/TestUser", headers={'X-OBSERVATORY-AUTH':tok_en})
     assert response.status_code == 200
 
+    #check user's data with admin/users
+    response = requests.get("http://localhost:8765/evcharge/api/admin/users/TestUser" + "?format=" + "json", headers={'X-OBSERVATORY-AUTH':tok_en})
+    assert response.status_code == 200
+
+    #check user's data with admin/users
+    response = requests.get("http://localhost:8765/evcharge/api/admin/users/TestUser"+ "?format=" + "csv" , headers={'X-OBSERVATORY-AUTH':tok_en})
+    assert response.status_code == 200
+
+    #check user's data with admin/users
+    response = requests.get("http://localhost:8765/evcharge/api/admin/users/TestUser" + "?format=" + "docx", headers={'X-OBSERVATORY-AUTH':tok_en})
+    assert response.status_code == 400
+
     #check invalid user's data with admin/users
     response = requests.get("http://localhost:8765/evcharge/api/admin/users/TestUser42", headers={'X-OBSERVATORY-AUTH':tok_en})
     assert response.status_code == 400
@@ -40,6 +52,7 @@ def test_admin_usermod_users():
     assert response.status_code == 200
 
 def test_admin_sessionsupd():
+
     url = "http://localhost:8765/evcharge/api/login"
     file = open("admin_creds.json", 'r')
     json_input = file.read()
@@ -57,13 +70,18 @@ def test_admin_sessionsupd():
     response = requests.post("http://localhost:8765/evcharge/api/admin/system/sessionsupd", data={'file': 'echarge\\backend\\testing\\user.json'}, headers={'X-OBSERVATORY-AUTH':tok_en})
     assert response.status_code == 400
 
-    #pass right file with data
+    #pass right file with data in sessionsupd
     response = requests.post("http://localhost:8765/evcharge/api/admin/system/sessionsupd", data={'file': 'echarge\\backend\\testing\\dummy_sessions.json'}, headers={'X-OBSERVATORY-AUTH':tok_en})
     assert response.status_code == 200
 
-    #logout
-    response = requests.post("http://localhost:8765/evcharge/api/logout", headers={'X-OBSERVATORY-AUTH':tok_en})
+    response = requests.post("http://localhost:8765/evcharge/api/admin/system/sessionsupd" + "?format=" + "json", data={'file': 'echarge\\backend\\testing\\dummy_sessions.json'}, headers={'X-OBSERVATORY-AUTH':tok_en})
     assert response.status_code == 200
+
+    response = requests.post("http://localhost:8765/evcharge/api/admin/system/sessionsupd" + "?format=" + "csv", data={'file': 'echarge\\backend\\testing\\dummy_sessions.json'}, headers={'X-OBSERVATORY-AUTH':tok_en})
+    assert response.status_code == 200
+
+    response = requests.post("http://localhost:8765/evcharge/api/admin/system/sessionsupd" + "?format=" + "docx", data={'file': 'echarge\\backend\\testing\\dummy_sessions.json'}, headers={'X-OBSERVATORY-AUTH':tok_en})
+    assert response.status_code == 400
 
 def test_sessions_per():
     url = "http://localhost:8765/evcharge/api/login"
@@ -132,4 +150,64 @@ def test_sessions_per():
 
     #logout
     response = requests.post("http://localhost:8765/evcharge/api/logout", headers={'X-OBSERVATORY-AUTH':tok_en})
+    assert response.status_code == 200
+
+def test_user_privs():
+    url = "http://localhost:8765/evcharge/api/login"
+    file = open("admin_creds.json", 'r')
+    json_input = file.read()
+    request_json = json.loads(json_input)
+    response = requests.post(url,request_json)
+    assert response.status_code == 200
+    tok_en = (response.json())["token"]
+
+    #admin/usermod
+    #add new user with admin/usermod
+    response = requests.post("http://localhost:8765/evcharge/api/admin/usermod/TestUser/TestPassword/User", headers={'X-OBSERVATORY-AUTH':tok_en})
+    assert response.status_code == 200
+
+    #response = requests.post("http://localhost:8765/evcharge/api/login", {'username': 'TestUser', 'password':'TestPassword'})
+    #assert response.status_code == 200
+    #tok_en = (response.json())["token"]
+
+    #def test_continue_with_bad_user():
+
+    url = "http://localhost:8765/evcharge/api/login"
+    file = open("bad_user.json", 'r')
+    json_input = file.read()
+    request_json = json.loads(json_input)
+    response = requests.post(url,request_json)
+    assert response.status_code == 200
+    tok_en2 = (response.json())["token"]
+
+    #change user's password and role with admin/usermod
+    response = requests.post("http://localhost:8765/evcharge/api/admin/usermod/TestUser/TestPassword2/Privileged", headers={'X-OBSERVATORY-AUTH':tok_en2})
+    assert response.status_code == 401
+
+    #check user's data with admin/users
+    response = requests.get("http://localhost:8765/evcharge/api/admin/users/TestUser", headers={'X-OBSERVATORY-AUTH':tok_en2})
+    assert response.status_code == 401
+
+    #pass right file with data in sessionsupd
+    response = requests.post("http://localhost:8765/evcharge/api/admin/system/sessionsupd", data={'file': 'echarge\\backend\\testing\\dummy_sessions.json'}, headers={'X-OBSERVATORY-AUTH':tok_en2})
+    assert response.status_code == 401
+
+    #check sessions for a point
+    response = requests.get("http://localhost:8765/evcharge/api/SessionsPerPoint/5f6978b800355e4c01059523/00010101/30000101",  headers={'X-OBSERVATORY-AUTH':tok_en2})
+    assert response.status_code == 401
+
+     #check sessions for a station
+    response = requests.get("http://localhost:8765/evcharge/api/SessionsPerStation/2389/00010101/30000101",  headers={'X-OBSERVATORY-AUTH':tok_en2})
+    assert response.status_code == 401
+
+    #check sessions for a e-vehicle
+    response = requests.get("http://localhost:8765/evcharge/api/SessionsPerEV/EV1/00010101/30000101",  headers={'X-OBSERVATORY-AUTH':tok_en2})
+    assert response.status_code == 401
+
+    #check sessions for a provider
+    response = requests.get("http://localhost:8765/evcharge/api/SessionsPerProvider/09876543211/00010101/30000101",  headers={'X-OBSERVATORY-AUTH':tok_en2})
+    assert response.status_code == 401
+
+    #logout
+    response = requests.post("http://localhost:8765/evcharge/api/logout", headers={'X-OBSERVATORY-AUTH':tok_en2})
     assert response.status_code == 200
