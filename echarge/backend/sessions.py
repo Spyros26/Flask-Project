@@ -148,7 +148,7 @@ def ses_per_station(current_user, stationID, date_from, date_to):
 
             if askformat=='json':
                 points_list.append({'PointID' : point.point_id,
-                                    'PointsSessions' : len(pool),
+                                    'Sessions' : len(pool),
                                     'EnergyDelivered' : total_kWh_point
                 })
 
@@ -182,7 +182,7 @@ def ses_per_station(current_user, stationID, date_from, date_to):
         return fcsv.send_csv(objl, "reply.csv", ["StationID", "Operator", "RequestTimestamp",
                                                 "PeriodFrom", "PeriodTo", "TotalEnergyDelivered",
                                                 "NumberOfChargingSessions", "NumberOfActivePoints",
-                                                "PointID", "PointSessions", "EnergyDelivered"], delimiter=';')                             
+                                                "PointID", "PointsSessions", "EnergyDelivered"], delimiter=';')                             
 
 
 @sessions.route('/SessionsPerEV/<vehicleID>/<date_from>/<date_to>', methods=['GET'])

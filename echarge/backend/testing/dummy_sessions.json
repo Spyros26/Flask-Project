@@ -1,0 +1,26 @@
+{
+    "_meta":
+      {
+        "end": "Thu, 01 Oct 2020 15:22:00 GMT",
+        "min_kWh": null,
+        "site": "caltech",
+        "start": "Sun, 01 Sep 2019 15:22:00 GMT"
+      },
+    "_items": [
+      {
+        "_id": "IdiotID",
+        "clusterID": "0039",
+        "connectionTime": "Sun, 01 Sep 2019 16:56:18 GMT",
+        "disconnectTime": "Sun, 01 Sep 2019 17:35:38 GMT",
+        "doneChargingTime": "Sun, 01 Sep 2019 17:26:26 GMT",
+        "kWhDelivered": 0.747,
+        "sessionID": "2_39_125_21_2019-09-01 16:56:17.548838",
+        "siteID": "0002",
+        "spaceID": "CA-311",
+        "stationID": "2-39-125-21",
+        "timezone": "America/Los_Angeles",
+        "userID": null,
+        "userInputs": null
+      }
+    ]
+}

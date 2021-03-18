@@ -116,7 +116,7 @@ def sessions_update(current_user):
             payment_table = ["Credit_Card", "Debit_Card", "Smartphone_Wallet",
                             "Website_Payment", "QR_Code", "Cash"]
 
-            for x in range(500,1000):
+            for x in range(0,length):
                 check = Session.query.filter_by(session_id=cont["_id"][x]).first()
                 if not check:
                     edit_start = cont["connectionTime"][x]
