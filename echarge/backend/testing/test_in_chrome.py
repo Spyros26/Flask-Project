@@ -12,7 +12,7 @@ options.add_argument('--ignore-certificate-errors')
 def set_path():
     global driver
     #Place the path for the driver for your own machine below
-    path = "C:\\Users\\User\\Desktop\\chromedriver.exe"
+    path = "driver//chromedriver.exe"
     driver = Chrome(executable_path=path, options=options)
     yield
     driver.close()

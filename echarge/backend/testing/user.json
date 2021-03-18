@@ -1,10 +1,10 @@
 {
-    "username": "Spyros4999",
+    "username": "User1",
     "Name": "Spyros",
     "email": "test@example.com",
     "car_brand": "Audi",
     "car_model": "R8",
-    "car_id": "My car id for test",
+    "car_id": "acarid",
     "password1": "123456" ,
     "password2": "123456"
 
